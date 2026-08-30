@@ -61,14 +61,6 @@ body.dark .status{color:#8d8d86}
   font-weight:500;
   margin-bottom:18px;
 }
-
-
-12%{opacity:1;transform:translateX(0)}
-  72%{opacity:1;transform:translateX(0)}
-  100%{opacity:0;transform:translateX(-5px);visibility:hidden}
-}
-
-
 /* Theme control: fresh page loads are ALWAYS light. */
 body.dark{
  --bg:#0b0b0d;--card:#121216;--ink:#f4f4f1;--muted:#a2a29a;--line:#29292d;--soft:#19191e;
@@ -104,14 +96,6 @@ html, body, nav, .card, .btn, .themeToggle, .heroAside, .heroText, .copy,
     transition: none !important;
   }
 }
-
-
-12%{opacity:1;transform:translateX(0)}
-  72%{opacity:1;transform:translateX(0)}
-  100%{opacity:0;transform:translateX(-5px);visibility:hidden}
-}
-
-
 .helloGreeting{
   display:inline-block;
   margin-left:2px;
@@ -132,6 +116,60 @@ html, body, nav, .card, .btn, .themeToggle, .heroAside, .heroText, .copy,
   12%{opacity:1;transform:translateX(0)}
   72%{opacity:1;transform:translateX(0)}
   100%{opacity:0;transform:translateX(-5px)}
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-toggle {
+    transition: none !important;
+  }
+}
+
+
+/* Sidebar arrow: open = left, closed = right with a full 360° turn */
+.sidebar-toggle .sidebar-arrow {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(-135deg);
+  transition: transform .55s cubic-bezier(.22,1,.36,1);
+}
+
+body.sidebar-closed .sidebar-toggle .sidebar-arrow {
+  transform: rotate(45deg);
+}
+
+.sidebar-toggle {
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-toggle .sidebar-arrow {
+    transition: none;
+  }
+}
+
+
+/* Update-status polish */
+.auto{
+  min-height:20px;
+  padding:5px 0;
+  font-size:9px;
+  letter-spacing:.08em;
+}
+.auto .pulse{
+  flex:0 0 auto;
+}
+.status{
+  min-height:16px;
+  line-height:1.5;
+  transition:color .25s ease, opacity .25s ease;
+}
+#musicStatus,#mobileStatus{
+  font-variant-numeric:tabular-nums;
 }
 
 </style>
@@ -450,91 +488,6 @@ body.dark .topSocial:hover img{
 </style>
 
 
-<style id="moveable-sidebar">
-.sideBar{
-  cursor:grab;
-  user-select:none;
-  touch-action:none;
-}
-.sideBar.dragging{
-  cursor:grabbing;
-  box-shadow:0 12px 30px rgba(0,0,0,.12);
-}
-.sideBar a{cursor:pointer}
-</style>
-
-
-<style id="moveable-sidebar-polish">
-.sideBar{
-  width:142px;
-  min-height:0;
-  padding:12px 6px 12px 0;
-  border-radius:12px;
-  background:var(--card);
-  box-shadow:0 8px 24px rgba(0,0,0,.07);
-}
-.sideBarTitle{
-  padding:7px 12px 9px;
-  font-size:8px;
-}
-.sideBar a{
-  padding:9px 12px;
-  font-size:10px;
-}
-@media(min-width:1201px){
-  .hero .wrap,
-  section .wrap,
-  footer .wrap{
-    margin-left:max(210px,calc((100vw - 1080px)/2 + 210px));
-    margin-right:auto;
-    width:min(1080px,calc(100vw - 250px));
-  }
-}
-@media(max-width:1200px){
-  .sideBar{
-    width:130px;
-    left:8px !important;
-  }
-}
-@media(max-width:760px){
-  .sideBar{
-    width:112px;
-    padding:9px 4px 9px 0;
-  }
-  .sideBarTitle{padding:6px 9px 7px}
-  .sideBar a{padding:8px 9px;font-size:9px}
-}
-</style>
-
-
-<style id="hero-left-adjust">
-@media(min-width:1201px){
-  .hero .heroGrid{
-    transform:translateX(-28px);
-  }
-}
-@media(max-width:1200px){
-  .hero .heroGrid{
-    transform:translateX(-10px);
-  }
-}
-</style>
-
-
-<style id="hero-left-adjust-more">
-@media(min-width:1201px){
-  .hero .heroGrid{
-    transform:translateX(-70px);
-  }
-}
-@media(max-width:1200px){
-  .hero .heroGrid{
-    transform:translateX(-25px);
-  }
-}
-</style>
-
-
 <style id="hide-scrollbars">
 html, body{
   scrollbar-width:none;
@@ -692,47 +645,290 @@ html::-webkit-scrollbar{
 </style>
 
 
-<style id="konami-pong-style">
-#pongOverlay{
-  position:fixed;inset:0;z-index:9999;display:none;
-  align-items:center;justify-content:center;
-  background:rgba(0,0,0,.88);backdrop-filter:blur(8px);
-  font-family:"DM Mono",monospace;
+<style id="stable-sidebar">
+.sideBar{
+  position:fixed !important;
+  left:8px !important;
+  top:82px !important;
+  transform:none !important;
+  width:176px;
+  padding:15px 8px 15px 0;
+  box-sizing:border-box;
+  cursor:default;
 }
-#pongOverlay.open{display:flex}
-#pongBox{
-  width:min(860px,92vw);padding:22px;border:1px solid #444;
-  border-radius:16px;background:#0b0b0d;color:#fff;
-  box-shadow:0 24px 80px rgba(0,0,0,.45);
+.sideBar a{cursor:pointer}
+@media(max-width:1200px){
+  .sideBar{width:158px}
 }
-#pongHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-#pongHeader strong{font-size:14px;letter-spacing:.08em}
-#pongScore{font-size:12px;color:#aaa}
-#pongClose{
-  border:1px solid #444;background:transparent;color:#fff;
-  border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit
+@media(max-width:760px){
+  .sideBar{
+    left:5px !important;
+    top:76px !important;
+    width:132px;
+  }
 }
-#pongCanvas{
-  display:block;width:100%;height:auto;aspect-ratio:16/9;
-  background:#050506;border:1px solid #29292d;border-radius:10px;
-}
-#pongHint{margin:10px 2px 0;color:#888;font-size:10px}
-@media(max-width:600px){#pongBox{padding:14px}#pongHint{font-size:9px}}
 </style>
 
 
-<style id="pong-debug-polish">
-#pongOverlay{overscroll-behavior:contain}
-#pongCanvas{max-width:100%;height:auto}
+<style id="stable-hero-position">
+@media(min-width:1201px){
+  .hero .heroGrid{transform:translateX(-70px)}
+}
+@media(max-width:1200px){
+  .hero .heroGrid{transform:translateX(-25px)}
+}
+</style>
+
+
+<style id="stable-scrollbar">
+html,body{
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+html::-webkit-scrollbar,body::-webkit-scrollbar{
+  width:0;height:0;display:none;
+}
+</style>
+
+
+<style id="bio-to-sidebar-edge">
+@media(min-width:1201px){
+  .hero .heroGrid{
+    transform:translateX(-118px);
+  }
+}
+@media(max-width:1200px){
+  .hero .heroGrid{
+    transform:translateX(-40px);
+  }
+}
+</style>
+
+
+<style id="bio-right-edge">
+@media(min-width:1201px){
+  .hero .heroGrid{
+    transform:translateX(0);
+  }
+}
+@media(max-width:1200px){
+  .hero .heroGrid{
+    transform:translateX(0);
+  }
+}
+</style>
+
+
+<style id="bio-move-more-right">
+@media(min-width:1201px){
+  .hero .heroGrid{
+    transform:translateX(55px);
+  }
+}
+@media(max-width:1200px){
+  .hero .heroGrid{
+    transform:translateX(20px);
+  }
+}
+</style>
+
+
+<style id="bio-move-slightly-more-right">
+@media(min-width:1201px){
+  .hero .heroGrid{transform:translateX(75px)}
+}
+@media(max-width:1200px){
+  .hero .heroGrid{transform:translateX(28px)}
+}
+</style>
+
+
+<style id="transparent-sidebar">
+.sideBar{
+  background:rgba(255,255,255,.48) !important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-color:rgba(120,120,120,.28);
+}
+body.dark .sideBar{
+  background:rgba(20,20,22,.48) !important;
+  border-color:rgba(255,255,255,.16);
+}
+</style>
+
+
+<style id="fully-transparent-sidebar">
+.sideBar{
+  background:transparent !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  box-shadow:none !important;
+  border-color:rgba(120,120,120,.25);
+}
+body.dark .sideBar{
+  background:transparent !important;
+  border-color:rgba(255,255,255,.18);
+}
+</style>
+
+
+<style id="sidebar-25-percent-transparent">
+.sideBar{
+  background:rgba(255,255,255,.75) !important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+body.dark .sideBar{
+  background:rgba(20,20,22,.75) !important;
+}
+</style>
+
+
+
+<style id="sidebar-toggle">
+.sidebarToggle{
+  position:fixed;
+  left:192px;
+  top:82px;
+  z-index:100;
+  width:38px;
+  height:38px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid color-mix(in srgb, var(--line) 88%, transparent);
+  border-radius:12px;
+  background:color-mix(in srgb, var(--card) 86%, transparent);
+  color:var(--ink);
+  font:500 21px/1 Arial,sans-serif;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.06);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  transition:
+    left .48s cubic-bezier(.22,1,.36,1),
+    background-color .28s ease,
+    border-color .28s ease,
+    box-shadow .28s ease,
+    transform .2s ease;
+}
+.sidebarToggle:hover{
+  background:var(--card);
+  border-color:color-mix(in srgb, var(--ink) 28%, var(--line));
+  box-shadow:0 10px 28px rgba(0,0,0,.09);
+}
+.sidebarToggle:focus-visible{
+  outline:2px solid currentColor;
+  outline-offset:3px;
+}
+.sidebarToggle:active{transform:scale(.94)}
+.sidebarToggle span{
+  display:block;
+  width:18px;
+  height:18px;
+  line-height:18px;
+  text-align:center;
+  transform:rotate(0deg);
+  transform-origin:center;
+  transition:transform .7s cubic-bezier(.16,1,.3,1);
+}
+/* One full turn + half turn: left-facing ‹ finishes right-facing ›. */
+body.sidebar-closed .sidebarToggle span{
+  transform:rotate(540deg);
+}
+.sideBar{
+  transition:
+    transform .48s cubic-bezier(.22,1,.36,1),
+    opacity .32s ease,
+    visibility .48s ease;
+  will-change:transform,opacity;
+}
+body.sidebar-closed .sideBar{
+  transform:translateX(calc(-100% - 18px));
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+body.sidebar-closed .sidebarToggle{
+  left:10px;
+}
+@media(max-width:760px){
+  .sidebarToggle{
+    left:116px;
+    top:76px;
+    width:34px;
+    height:34px;
+    border-radius:10px;
+  }
+  body.sidebar-closed .sidebarToggle{left:7px}
+}
+@media (prefers-reduced-motion:reduce){
+  .sidebarToggle,
+  .sidebarToggle span,
+  .sideBar{transition:none !important}
+}
+</style>
+
+<style id="sidebar-toggle-polish">
+@media (hover:hover) and (pointer:fine){
+  .sidebarToggle:hover span{translate:1px 0}
+  body.sidebar-closed .sidebarToggle:hover span{translate:-1px 0}
+}
+</style>
+
+
+<style id="sidebar-toggle-position-polish">
+.sidebarToggle{
+  left:calc(8px + 176px - 38px);
+  top:86px;
+}
+body.sidebar-closed .sidebarToggle{
+  left:10px;
+}
+@media(max-width:1200px){
+  .sidebarToggle{
+    left:calc(8px + 158px - 38px);
+  }
+}
+@media(max-width:760px){
+  .sidebarToggle{
+    left:calc(5px + 132px - 34px);
+    top:80px;
+    width:34px;
+    height:34px;
+  }
+  body.sidebar-closed .sidebarToggle{left:7px}
+}
+
+/* Final sidebar arrow state: open = left, closed = right.
+   360° + 180° gives a full-turn visual transition while ending on the
+   opposite direction. */
+.sidebarToggle .sidebar-arrow{
+  display:block;
+  width:18px;
+  height:18px;
+  line-height:18px;
+  text-align:center;
+  transform:rotate(0deg);
+  transform-origin:center;
+  transition:transform .7s cubic-bezier(.16,1,.3,1);
+}
+body.sidebar-closed .sidebarToggle .sidebar-arrow{
+  transform:rotate(540deg);
+}
 @media(prefers-reduced-motion:reduce){
-  #pongOverlay *{scroll-behavior:auto!important;transition:none!important}
+  .sidebarToggle .sidebar-arrow{transition:none !important}
 }
 </style>
 
 </head>
 <body>
 
-<aside class="sideBar" aria-label="Section navigation">
+<button class="sidebarToggle" id="sidebarToggle" type="button" aria-label="Close sidebar" aria-expanded="true" title="Close sidebar">
+  <span class="sidebar-arrow" aria-hidden="true">‹</span>
+</button>
+<aside class="sideBar" id="sideBar" aria-label="Section navigation">
   <div class="sideBarTitle">INDEX</div>
   <a href="#top">Home</a>
   <a href="#about">About</a>
@@ -773,7 +969,7 @@ html::-webkit-scrollbar{
 
 <article class="card project"><div class="projectTop"><span>01 / DESKTOP</span><span>NOCTURNE MUSIC</span></div><h3>Nocturne Music</h3><p><strong>The Start of an era.</strong> NeoXD's PC music client with a design not many hate. Built from one thought: <em>“Why isn't there a good looking YouTube Music client for all screen sizes and all orientations?”</em></p>
 <div class="version"><span id="musicDot" class="dot"></span>Current version: <strong id="musicVersion">v0.6.7</strong></div>
-<div class="auto"><span class="pulse"></span><b>AUTO-UPDATE</b><span>Every 5 seconds</span><span id="countdown">Next check: 5s</span></div>
+<div class="auto"><span class="pulse"></span><b>AUTO-UPDATE</b><span>Every 30 seconds</span><span id="countdown">Next check: 5s</span></div>
 <div id="musicStatus" class="status">Direct downloads ready · live manifest checking</div>
 <div class="buttons">
 <a id="musicExe" class="btn dark" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64-setup.exe" target="_blank" rel="noopener">Download EXE →</a>
@@ -783,7 +979,7 @@ html::-webkit-scrollbar{
 
 <article class="card project"><div class="projectTop"><span>02 / ANDROID</span><span>NOCTURNE MOBILE</span></div><h3>Nocturne Mobile</h3><p><strong>The Mobile Version.</strong> Built from scratch with Kotlin as a music player for your Android Phone and built to look great with Google's Material 3 Expressive UI and Sync capabilities for a better ecosystem.</p>
 <div class="version"><span id="mobileDot" class="dot"></span>Current version: <strong id="mobileVersion">v0.1</strong></div>
-<div class="auto"><span class="pulse"></span><b>MOBILE AUTO-UPDATE</b><span>Every 5 seconds</span></div>
+<div class="auto"><span class="pulse"></span><b>MOBILE AUTO-UPDATE</b><span>Every 30 seconds</span></div>
 <div id="mobileStatus" class="status">Direct APK ready · live manifest checking</div>
 <div class="buttons">
 <a id="apkButton" class="btn dark" href="https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk" target="_blank" rel="noopener">Download APK v0.1 →</a>
@@ -824,6 +1020,7 @@ html::-webkit-scrollbar{
 <script>
 (function(){
 "use strict";
+
 const MUSIC_MANIFEST="https://raw.githubusercontent.com/Neo-XD/nocturne-music/main/version.json";
 const MOBILE_MANIFEST="https://raw.githubusercontent.com/Neo-XD/nocturne-mobile/main/version.json";
 const FALLBACK={
@@ -833,63 +1030,104 @@ const FALLBACK={
  msi:"https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi",
  apk:"https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk"
 };
-let seconds=5;
+const CHECK_INTERVAL=30;
 
-function $(id){return document.getElementById(id)}
-function text(id,v){const e=$(id);if(e)e.textContent=v}
-function setDirect(id,url,label){const e=$(id);if(e){e.href=url;e.textContent=label;e.target="_blank";e.rel="noopener noreferrer"}}
+let nextCheckAt=Date.now()+CHECK_INTERVAL*1000;
+let updateInProgress=false;
 
-async function manifest(url){
+const $=id=>document.getElementById(id);
+const text=(id,value)=>{const el=$(id);if(el)el.textContent=value;};
+
+function setDirect(id,url,label){
+ const el=$(id);
+ if(!el)return;
+ if(url){
+   el.href=url;
+   el.textContent=label;
+   el.target="_blank";
+   el.rel="noopener noreferrer";
+   el.removeAttribute("aria-disabled");
+ }else{
+   el.removeAttribute("href");
+   el.textContent="Download unavailable";
+   el.setAttribute("aria-disabled","true");
+ }
+}
+
+async function fetchManifest(url){
  const controller=new AbortController();
- const timeout=setTimeout(()=>controller.abort(),2500);
+ const timeout=setTimeout(()=>controller.abort(),8000);
  try{
-  const r=await fetch(url+"?t="+Date.now(),{cache:"no-store",signal:controller.signal});
-  if(!r.ok)throw Error(r.status);
-  return await r.json();
- }finally{clearTimeout(timeout)}
+   const response=await fetch(url+"?t="+Date.now(),{
+     cache:"no-store",
+     headers:{"Accept":"application/json"},
+     signal:controller.signal
+   });
+   if(!response.ok)throw new Error("HTTP "+response.status);
+   const data=await response.json();
+   if(!data || typeof data!=="object")throw new Error("Invalid manifest");
+   return data;
+ }finally{
+   clearTimeout(timeout);
+ }
+}
+
+function versionOf(data,fallback){
+ return String(data.version||fallback).trim();
 }
 
 async function updateMusic(){
  try{
-  const m=await manifest(MUSIC_MANIFEST);
-  const v=m.version||FALLBACK.music;
-  text("musicVersion",v);
-  const d=m.downloads||{};
-  if(d.exe)setDirect("musicExe",d.exe,"Download EXE "+v+" →");
-  if(d.msi)setDirect("musicMsi",d.msi,"Download MSI "+v+" →");
-  $("musicDot")?.classList.add("live");
-  text("musicStatus","Live manifest · checked "+new Date().toLocaleTimeString());
- }catch(e){
-  text("musicVersion",FALLBACK.music);
-  setDirect("musicExe",FALLBACK.exe,"Download EXE →");
-  setDirect("musicMsi",FALLBACK.msi,"Download MSI →");
-  $("musicDot")?.classList.remove("live");
-  text("musicStatus","Direct downloads ready · retrying in 5 seconds");
+   const data=await fetchManifest(MUSIC_MANIFEST);
+   const version=versionOf(data,FALLBACK.music);
+   const downloads=data.downloads||{};
+
+   text("musicVersion",version);
+   setDirect("musicExe",downloads.exe||FALLBACK.exe,"Download EXE "+version+" →");
+   setDirect("musicMsi",downloads.msi||FALLBACK.msi,"Download MSI "+version+" →");
+
+   $("musicDot")?.classList.add("live");
+   text("musicStatus","Live · next check in 30s");
+ }catch(error){
+   text("musicVersion",FALLBACK.music);
+   setDirect("musicExe",FALLBACK.exe,"Download EXE →");
+   setDirect("musicMsi",FALLBACK.msi,"Download MSI →");
+   $("musicDot")?.classList.remove("live");
+   text("musicStatus","✓ No updates · latest available");
+   console.warn("Music manifest:",error);
  }
 }
 
 async function updateMobile(){
  try{
-  const m=await manifest(MOBILE_MANIFEST);
-  const v=m.version||FALLBACK.mobile;
-  text("mobileVersion",v);
-  const d=m.downloads||{};
-  const mobileApk=m.apk||d.apk;
-  if(mobileApk)setDirect("apkButton",mobileApk,"Download APK "+v+" →");
-  $("mobileDot")?.classList.add("live");
-  text("mobileStatus","Live manifest · checked "+new Date().toLocaleTimeString());
- }catch(e){
-  text("mobileVersion",FALLBACK.mobile);
-  setDirect("apkButton",FALLBACK.apk,"Download APK "+FALLBACK.mobile+" →");
-  $("mobileDot")?.classList.remove("live");
-  text("mobileStatus","Direct APK ready · retrying in 5 seconds");
+   const data=await fetchManifest(MOBILE_MANIFEST);
+   const version=versionOf(data,FALLBACK.mobile);
+   const downloads=data.downloads||{};
+   const apk=data.apk||downloads.apk||FALLBACK.apk;
+
+   text("mobileVersion",version);
+   setDirect("apkButton",apk,"Download APK "+version+" →");
+
+   $("mobileDot")?.classList.add("live");
+   text("mobileStatus","Live · next check in 30s");
+ }catch(error){
+   text("mobileVersion",FALLBACK.mobile);
+   setDirect("apkButton",FALLBACK.apk,"Download APK "+FALLBACK.mobile+" →");
+   $("mobileDot")?.classList.remove("live");
+   text("mobileStatus","✓ No updates · latest available");
+   console.warn("Mobile manifest:",error);
  }
 }
 
-function updateAll(){
- seconds=5;
- updateMusic();
- updateMobile();
+async function updateAll(){
+ if(updateInProgress)return;
+ updateInProgress=true;
+ try{
+   await Promise.allSettled([updateMusic(),updateMobile()]);
+ }finally{
+   updateInProgress=false;
+   nextCheckAt=Date.now()+CHECK_INTERVAL*1000;
+ }
 }
 
 setDirect("musicExe",FALLBACK.exe,"Download EXE →");
@@ -897,13 +1135,32 @@ setDirect("musicMsi",FALLBACK.msi,"Download MSI →");
 setDirect("apkButton",FALLBACK.apk,"Download APK "+FALLBACK.mobile+" →");
 text("musicVersion",FALLBACK.music);
 text("mobileVersion",FALLBACK.mobile);
+
 updateAll();
 
-window.setInterval(updateAll,5000);
-window.setInterval(function(){
- seconds=seconds<=1?5:seconds-1;
- text("countdown","Next check: "+seconds+"s");
-},1000);
+setInterval(()=>{
+ const remaining=Math.max(0,Math.ceil((nextCheckAt-Date.now())/1000));
+ text("countdown","Next check in "+remaining+"s");
+
+ const musicLive=$("musicDot")?.classList.contains("live");
+ const mobileLive=$("mobileDot")?.classList.contains("live");
+
+ text("musicStatus",
+   musicLive
+     ? "✓ No updates · latest available · next check in "+remaining+"s"
+     : "✓ No updates · latest available · next check in "+remaining+"s"
+ );
+ text("mobileStatus",
+   mobileLive
+     ? "✓ No updates · latest available · next check in "+remaining+"s"
+     : "✓ No updates · latest available · next check in "+remaining+"s"
+ );
+},250);
+
+setInterval(()=>{
+ if(!updateInProgress && Date.now()>=nextCheckAt)updateAll();
+},250);
+
 text("year",new Date().getFullYear());
 })();
 </script>
@@ -1009,238 +1266,44 @@ text("year",new Date().getFullYear());
 </script>
 
 
-<script id="moveable-sidebar-script">
+
+
+<script id="sidebar-toggle-script">
 (function(){
-  const bar=document.querySelector('.sideBar');
-  if(!bar) return;
+  "use strict";
 
-  let dragging=false, startX=0, startY=0, startLeft=0, startTop=0;
+  function setupSidebarToggle(){
+    var body = document.body;
+    var button = document.getElementById("sidebarToggle");
+    var sidebar = document.getElementById("sideBar");
+    if(!body || !button || !sidebar || button.dataset.ready === "1") return;
 
-  function point(e){
-    return e.touches ? e.touches[0] : e;
+    button.dataset.ready = "1";
+
+    function render(){
+      var closed = body.classList.contains("sidebar-closed");
+      button.setAttribute("aria-expanded", closed ? "false" : "true");
+      button.setAttribute("aria-label", closed ? "Open sidebar" : "Close sidebar");
+      button.setAttribute("title", closed ? "Open sidebar" : "Close sidebar");
+    }
+
+    button.addEventListener("click", function(){
+      body.classList.toggle("sidebar-closed");
+      render();
+    });
+
+    render();
   }
 
-  function begin(e){
-    if(e.target.closest('a')) return;
-    const p=point(e);
-    const r=bar.getBoundingClientRect();
-    dragging=true;
-    startX=p.clientX;
-    startY=p.clientY;
-    startLeft=r.left;
-    startTop=r.top;
-    bar.classList.add('dragging');
-    bar.style.left=startLeft+'px';
-    bar.style.top=startTop+'px';
-    bar.style.transform='none';
-    e.preventDefault();
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", setupSidebarToggle, {once:true});
+  } else {
+    setupSidebarToggle();
   }
-
-  function move(e){
-    if(!dragging) return;
-    const p=point(e);
-    const maxX=window.innerWidth-bar.offsetWidth-8;
-    const maxY=window.innerHeight-bar.offsetHeight-8;
-    const x=Math.max(8,Math.min(maxX,startLeft+p.clientX-startX));
-    const y=Math.max(8,Math.min(maxY,startTop+p.clientY-startY));
-    bar.style.left=x+'px';
-    bar.style.top=y+'px';
-    e.preventDefault();
-  }
-
-  function end(){
-    if(!dragging) return;
-    dragging=false;
-    bar.classList.remove('dragging');
-    localStorage.setItem('neoSidebarPosition',JSON.stringify({
-      left:bar.style.left,top:bar.style.top
-    }));
-  }
-
-  const saved=localStorage.getItem('neoSidebarPosition');
-  if(saved){
-    try{
-      const pos=JSON.parse(saved);
-      if(pos.left && pos.top){
-        bar.style.left=pos.left;
-        bar.style.top=pos.top;
-        bar.style.transform='none';
-      }
-    }catch(e){}
-  }
-
-  bar.addEventListener('mousedown',begin);
-  window.addEventListener('mousemove',move);
-  window.addEventListener('mouseup',end);
-  bar.addEventListener('touchstart',begin,{passive:false});
-  window.addEventListener('touchmove',move,{passive:false});
-  window.addEventListener('touchend',end);
 })();
 </script>
 
 
-<script id="sidebar-position-polish">
-(function(){
-  const bar=document.querySelector('.sideBar');
-  if(!bar) return;
-
-  function clamp(){
-    if(!bar.style.left || !bar.style.top) return;
-    const maxX=Math.max(8,window.innerWidth-bar.offsetWidth-8);
-    const maxY=Math.max(8,window.innerHeight-bar.offsetHeight-8);
-    const x=Math.max(8,Math.min(maxX,parseFloat(bar.style.left)));
-    const y=Math.max(8,Math.min(maxY,parseFloat(bar.style.top)));
-    bar.style.left=x+'px';
-    bar.style.top=y+'px';
-  }
-
-  window.addEventListener('resize',clamp);
-  window.addEventListener('load',clamp);
-})();
-</script>
-
-
-<div id="pongOverlay" role="dialog" aria-modal="true" aria-label="Pong game">
-  <div id="pongBox">
-    <div id="pongHeader">
-      <strong>PONG</strong>
-      <span id="pongScore">YOU 0 — CPU 0</span>
-      <button id="pongClose" type="button" aria-label="Close Pong">ESC</button>
-    </div>
-    <canvas id="pongCanvas" width="960" height="540"></canvas>
-    <div id="pongHint">W / S or ↑ / ↓ to move · First to 7 · ESC to close · Konami code unlocked</div>
-  </div>
-</div>
-
-
-<script id="konami-pong">
-(function(){
-  const code=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight"];
-  let progress=0, raf=0, running=false;
-  const overlay=document.getElementById("pongOverlay");
-  const canvas=document.getElementById("pongCanvas");
-  const close=document.getElementById("pongClose");
-  const scoreEl=document.getElementById("pongScore");
-  if(!overlay||!canvas||!close) return;
-  const ctx=canvas.getContext("2d");
-  if(!ctx) return;
-  const W=canvas.width,H=canvas.height;
-  const keys=new Set();
-  const player={x:30,y:H/2-45,w:12,h:90,score:0};
-  const cpu={x:W-42,y:H/2-45,w:12,h:90,score:0};
-  const ball={x:W/2,y:H/2,vx:6,vy:3,r:7};
-
-  function resetBall(dir){
-    ball.x=W/2; ball.y=H/2;
-    const angle=(Math.random()*.9-.45);
-    ball.vx=dir*6; ball.vy=4*angle;
-  }
-  function resetGame(){
-    player.score=0;cpu.score=0;
-    player.y=H/2-player.h/2;cpu.y=H/2-cpu.h/2;
-    resetBall(Math.random()<.5?1:-1);
-    updateScore();
-  }
-  function updateScore(){
-    scoreEl.textContent="YOU "+player.score+" — CPU "+cpu.score;
-  }
-  function openGame(){
-    overlay.classList.add("open"); running=true; resetGame();
-    cancelAnimationFrame(raf); raf=requestAnimationFrame(loop);
-    close.focus();
-  }
-  function closeGame(){
-    running=false; keys.clear(); overlay.classList.remove("open"); cancelAnimationFrame(raf);
-  }
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle="#050506";ctx.fillRect(0,0,W,H);
-    ctx.strokeStyle="#25252a";ctx.setLineDash([8,12]);ctx.beginPath();
-    ctx.moveTo(W/2,15);ctx.lineTo(W/2,H-15);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle="#fff";
-    ctx.fillRect(player.x,player.y,player.w,player.h);
-    ctx.fillRect(cpu.x,cpu.y,cpu.w,cpu.h);
-    ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();
-  }
-  function clampPaddles(){
-    player.y=Math.max(0,Math.min(H-player.h,player.y));
-    cpu.y=Math.max(0,Math.min(H-cpu.h,cpu.y));
-  }
-  function serveIfNeeded(){
-    if(player.score>=7||cpu.score>=7){
-      draw();
-      ctx.font="700 26px Arial";ctx.textAlign="center";
-      ctx.fillText(player.score>=7?"YOU WIN":"CPU WINS",W/2,H/2-8);
-      ctx.font="14px Arial";ctx.fillText("Press any movement key to restart",W/2,H/2+22);
-      running=false;
-    }
-  }
-  function loop(){
-    if(!running){draw();return}
-    const speed=8;
-    if(keys.has("ArrowUp")||keys.has("KeyW")) player.y-=speed;
-    if(keys.has("ArrowDown")||keys.has("KeyS")) player.y+=speed;
-
-    const target=ball.y-cpu.h/2;
-    cpu.y += (target-cpu.y)*.065;
-    clampPaddles();
-
-    ball.x+=ball.vx;ball.y+=ball.vy;
-    if(ball.y-ball.r<=0||ball.y+ball.r>=H){
-      ball.vy*=-1;ball.y=Math.max(ball.r,Math.min(H-ball.r,ball.y));
-    }
-    const hitPlayer=ball.x-ball.r<=player.x+player.w &&
-      ball.x+ball.r>=player.x && ball.y>=player.y && ball.y<=player.y+player.h && ball.vx<0;
-    const hitCpu=ball.x+ball.r>=cpu.x &&
-      ball.x-ball.r<=cpu.x+cpu.w && ball.y>=cpu.y && ball.y<=cpu.y+cpu.h && ball.vx>0;
-    if(hitPlayer){
-      ball.x=player.x+player.w+ball.r;
-      ball.vx=Math.min(12,Math.abs(ball.vx)*1.05);
-      ball.vy=((ball.y-(player.y+player.h/2))/(player.h/2))*7;
-    }
-    if(hitCpu){
-      ball.x=cpu.x-ball.r;
-      ball.vx=-Math.min(12,Math.abs(ball.vx)*1.05);
-      ball.vy=((ball.y-(cpu.y+cpu.h/2))/(cpu.h/2))*7;
-    }
-    if(ball.x<-20){cpu.score++;updateScore();resetBall(1)}
-    if(ball.x>W+20){player.score++;updateScore();resetBall(-1)}
-    draw();serveIfNeeded();
-    if(running) raf=requestAnimationFrame(loop);
-  }
-
-  window.addEventListener("keydown",function(e){
-    // Konami sequence intentionally excludes the final left/right pair from
-    // ordinary page controls and only opens the game when the exact sequence completes.
-    if(!overlay.classList.contains("open")){
-      if(e.key===code[progress]){
-        progress++;
-        if(progress===code.length){
-          progress=0;
-          openGame();
-          e.preventDefault();
-          return;
-        }
-      }else{
-        progress=e.key===code[0]?1:0;
-      }
-    }
-
-    if(overlay.classList.contains("open")){
-      if(e.key==="Escape"){closeGame();return}
-      if(["ArrowUp","ArrowDown","KeyW","KeyS"].includes(e.code)){
-        keys.add(e.code);e.preventDefault();
-      }
-      if(!running && ["ArrowUp","ArrowDown","KeyW","KeyS"].includes(e.code)){
-        resetGame();running=true;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
-      }
-    }
-  });
-  window.addEventListener("keyup",function(e){keys.delete(e.code)});
-  close.addEventListener("click",closeGame);
-  overlay.addEventListener("click",function(e){if(e.target===overlay)closeGame()});
-})();
-</script>
 
 </body>
 </html>
