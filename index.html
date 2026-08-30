@@ -1031,7 +1031,6 @@ const FALLBACK={
  apk:"https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk"
 };
 const CHECK_INTERVAL=30;
-
 let nextCheckAt=Date.now()+CHECK_INTERVAL*1000;
 let updateInProgress=false;
 
@@ -1042,80 +1041,105 @@ function setDirect(id,url,label){
  const el=$(id);
  if(!el)return;
  if(url){
-   el.href=url;
-   el.textContent=label;
-   el.target="_blank";
-   el.rel="noopener noreferrer";
-   el.removeAttribute("aria-disabled");
+  el.href=url;
+  el.textContent=label;
+  el.target="_blank";
+  el.rel="noopener noreferrer";
+  el.removeAttribute("aria-disabled");
  }else{
-   el.removeAttribute("href");
-   el.textContent="Download unavailable";
-   el.setAttribute("aria-disabled","true");
+  el.removeAttribute("href");
+  el.textContent="Download unavailable";
+  el.setAttribute("aria-disabled","true");
  }
 }
 
-async function fetchManifest(url){
+async function fetchJson(url){
  const controller=new AbortController();
  const timeout=setTimeout(()=>controller.abort(),8000);
  try{
-   const response=await fetch(url+"?t="+Date.now(),{
-     cache:"no-store",
-     headers:{"Accept":"application/json"},
-     signal:controller.signal
-   });
-   if(!response.ok)throw new Error("HTTP "+response.status);
-   const data=await response.json();
-   if(!data || typeof data!=="object")throw new Error("Invalid manifest");
-   return data;
- }finally{
-   clearTimeout(timeout);
- }
+  const response=await fetch(url,{
+   cache:"no-store",
+   headers:{"Accept":"application/vnd.github+json"},
+   signal:controller.signal
+  });
+  if(!response.ok)throw new Error("HTTP "+response.status);
+  const data=await response.json();
+  if(!data||typeof data!=="object")throw new Error("Invalid response");
+  return data;
+ }finally{clearTimeout(timeout)}
 }
 
-function versionOf(data,fallback){
- return String(data.version||fallback).trim();
+function findAsset(release,patterns){
+ const assets=Array.isArray(release.assets)?release.assets:[];
+ for(const pattern of patterns){
+  const found=assets.find(a=>pattern.test(a.name||""));
+  if(found?.browser_download_url)return found.browser_download_url;
+ }
+ return null;
+}
+
+async function getLatestRelease(apiUrl,manifestUrl){
+ try{
+  return {source:"github",data:await fetchJson(apiUrl)};
+ }catch(apiError){
+  try{
+   return {source:"manifest",data:await fetchJson(manifestUrl)};
+  }catch(manifestError){
+   throw new Error("Release and manifest unavailable");
+  }
+ }
 }
 
 async function updateMusic(){
  try{
-   const data=await fetchManifest(MUSIC_MANIFEST);
-   const version=versionOf(data,FALLBACK.music);
-   const downloads=data.downloads||{};
+  const result=await getLatestRelease(
+   "https://api.github.com/repos/Neo-XD/nocturne-music/releases/latest",
+   "https://raw.githubusercontent.com/Neo-XD/nocturne-music/main/version.json"
+  );
+  const m=result.data;
+  const version=m.tag_name||m.version||"Latest";
+  const downloads=m.downloads||{};
+  let exe=downloads.exe||m.exe||null;
+  let msi=downloads.msi||m.msi||null;
 
-   text("musicVersion",version);
-   setDirect("musicExe",downloads.exe||FALLBACK.exe,"Download EXE "+version+" →");
-   setDirect("musicMsi",downloads.msi||FALLBACK.msi,"Download MSI "+version+" →");
+  if(result.source==="github"){
+   exe ||= findAsset(m,[/setup.*\.exe$/i,/\.exe$/i]);
+   msi ||= findAsset(m,[/\.msi$/i]);
+  }
 
-   $("musicDot")?.classList.add("live");
-   text("musicStatus","Live · next check in 30s");
+  text("musicVersion",version);
+  if(exe)setDirect("musicExe",exe,"Download EXE "+version+" →");
+  if(msi)setDirect("musicMsi",msi,"Download MSI "+version+" →");
+  $("musicDot")?.classList.add("live");
  }catch(error){
-   text("musicVersion",FALLBACK.music);
-   setDirect("musicExe",FALLBACK.exe,"Download EXE →");
-   setDirect("musicMsi",FALLBACK.msi,"Download MSI →");
-   $("musicDot")?.classList.remove("live");
-   text("musicStatus","✓ No updates · latest available");
-   console.warn("Music manifest:",error);
+  $("musicDot")?.classList.remove("live");
+  text("musicStatus","✓ No updates · latest available");
+  console.warn("Music update check:",error);
  }
 }
 
 async function updateMobile(){
  try{
-   const data=await fetchManifest(MOBILE_MANIFEST);
-   const version=versionOf(data,FALLBACK.mobile);
-   const downloads=data.downloads||{};
-   const apk=data.apk||downloads.apk||FALLBACK.apk;
+  const result=await getLatestRelease(
+   "https://api.github.com/repos/Neo-XD/nocturne-mobile/releases/latest",
+   "https://raw.githubusercontent.com/Neo-XD/nocturne-mobile/main/version.json"
+  );
+  const m=result.data;
+  const version=m.tag_name||m.version||"Latest";
+  const downloads=m.downloads||{};
+  let apk=m.apk||downloads.apk||null;
 
-   text("mobileVersion",version);
-   setDirect("apkButton",apk,"Download APK "+version+" →");
+  if(result.source==="github"){
+   apk ||= findAsset(m,[/\.apk$/i]);
+  }
 
-   $("mobileDot")?.classList.add("live");
-   text("mobileStatus","Live · next check in 30s");
+  text("mobileVersion",version);
+  if(apk)setDirect("apkButton",apk,"Download APK "+version+" →");
+  $("mobileDot")?.classList.add("live");
  }catch(error){
-   text("mobileVersion",FALLBACK.mobile);
-   setDirect("apkButton",FALLBACK.apk,"Download APK "+FALLBACK.mobile+" →");
-   $("mobileDot")?.classList.remove("live");
-   text("mobileStatus","✓ No updates · latest available");
-   console.warn("Mobile manifest:",error);
+  $("mobileDot")?.classList.remove("live");
+  text("mobileStatus","✓ No updates · latest available");
+  console.warn("Mobile update check:",error);
  }
 }
 
@@ -1123,10 +1147,10 @@ async function updateAll(){
  if(updateInProgress)return;
  updateInProgress=true;
  try{
-   await Promise.allSettled([updateMusic(),updateMobile()]);
+  await Promise.allSettled([updateMusic(),updateMobile()]);
  }finally{
-   updateInProgress=false;
-   nextCheckAt=Date.now()+CHECK_INTERVAL*1000;
+  updateInProgress=false;
+  nextCheckAt=Date.now()+CHECK_INTERVAL*1000;
  }
 }
 
@@ -1141,20 +1165,8 @@ updateAll();
 setInterval(()=>{
  const remaining=Math.max(0,Math.ceil((nextCheckAt-Date.now())/1000));
  text("countdown","Next check in "+remaining+"s");
-
- const musicLive=$("musicDot")?.classList.contains("live");
- const mobileLive=$("mobileDot")?.classList.contains("live");
-
- text("musicStatus",
-   musicLive
-     ? "✓ No updates · latest available · next check in "+remaining+"s"
-     : "✓ No updates · latest available · next check in "+remaining+"s"
- );
- text("mobileStatus",
-   mobileLive
-     ? "✓ No updates · latest available · next check in "+remaining+"s"
-     : "✓ No updates · latest available · next check in "+remaining+"s"
- );
+ text("musicStatus","✓ No updates · latest available · next check in "+remaining+"s");
+ text("mobileStatus","✓ No updates · latest available · next check in "+remaining+"s");
 },250);
 
 setInterval(()=>{
@@ -1162,8 +1174,7 @@ setInterval(()=>{
 },250);
 
 text("year",new Date().getFullYear());
-})();
-</script>
+})();</script>
 
 
 <script>
