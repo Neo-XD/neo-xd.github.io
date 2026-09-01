@@ -1,0 +1,1215 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nocturne Music — A Lightweight, Ad-Free YouTube Music Client</title>
+<meta name="description" content="Nocturne is a free, open-source, lightweight desktop & mobile player for YouTube Music. Native Rust core, ad-free playback, synchronized lyrics, Listen Together, and rich library sync.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<meta property="og:title" content="Nocturne Music — Ad-Free YouTube Music Client">
+<meta property="og:description" content="A lightweight, beautiful player for YouTube Music with synced lyrics, Listen Together, and native performance on Windows, Linux & Android.">
+<meta property="og:image" content="assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #09090b;
+  --bg-subtle: #111114;
+  --card: #141418;
+  --card-hover: #1c1c22;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-hover: rgba(255, 255, 255, 0.22);
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --accent: #ffffff;
+  --accent-invert: #09090b;
+  --accent-glow: rgba(255, 255, 255, 0.12);
+  --header-bg: rgba(9, 9, 11, 0.82);
+  --line: rgba(255, 255, 255, 0.08);
+  --success: #22c55e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;
+}
+a { text-decoration: none; color: inherit; }
+
+.wrap {
+  width: min(1180px, calc(100% - 48px));
+  margin: auto;
+}
+
+/* ==================== AMBIENT BACKGROUND GLOW ==================== */
+.ambientGlow {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.ambientGlow::before {
+  content: "";
+  position: absolute;
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 500px;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 45%, transparent 70%);
+  filter: blur(60px);
+}
+
+/* ==================== TOP NAVIGATION ==================== */
+header.nocturneNav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--header-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  transition: border-color .3s ease;
+}
+.navContainer {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.navBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+.navBrand img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: #000;
+  display: block;
+}
+.navMenu {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.navMenu a {
+  transition: color .2s ease;
+}
+.navMenu a:hover {
+  color: var(--text-primary);
+}
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btnBackPortfolio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all .2s ease;
+}
+.btnBackPortfolio:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.btnGithubNav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+.btnGithubNav:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  transform: translateY(-1px);
+}
+.starCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  font-size: 11px;
+  font-family: "DM Mono", monospace;
+}
+.btnGithubNav:hover .starCount {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== HERO SECTION ==================== */
+section.heroSection {
+  position: relative;
+  z-index: 1;
+  padding: 90px 0 100px;
+  text-align: center;
+}
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  font: 11px "DM Mono", monospace;
+  color: var(--text-secondary);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.badgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 10px var(--success);
+}
+h1.heroTitle {
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: clamp(48px, 7.5vw, 84px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  max-width: 960px;
+  margin: 0 auto 24px;
+  background: linear-gradient(180deg, #ffffff 40%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+p.heroDesc {
+  max-width: 680px;
+  margin: 0 auto 36px;
+  font-size: clamp(16px, 2vw, 19px);
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+.heroCtas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.btnCtaPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #09090b;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1px solid #ffffff;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+  transition: all .2s ease;
+  cursor: pointer;
+}
+.btnCtaPrimary:hover {
+  background: #eaeaea;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(255, 255, 255, 0.25);
+}
+.btnCtaSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid var(--card-border);
+  transition: all .2s ease;
+}
+.btnCtaSecondary:hover {
+  background: var(--card-hover);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+.heroMetaNote {
+  font: 12px "DM Mono", monospace;
+  color: var(--text-muted);
+}
+.heroMetaNote strong {
+  color: var(--text-secondary);
+}
+
+/* Hero Screenshot Window Frame */
+.heroShowcase {
+  margin-top: 60px;
+  position: relative;
+}
+.showcaseWindow {
+  position: relative;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #000;
+  overflow: hidden;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8), 0 0 120px rgba(255, 255, 255, 0.05);
+}
+.windowBar {
+  height: 38px;
+  background: #111115;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+}
+.windowDots {
+  display: flex;
+  gap: 6px;
+}
+.windowDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2a2a30;
+}
+.windowTitle {
+  flex: 1;
+  text-align: center;
+  font: 11px "DM Mono", monospace;
+  color: var(--text-muted);
+}
+.showcaseWindow img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* ==================== FEATURES SECTION ==================== */
+section.sectionBlock {
+  position: relative;
+  z-index: 1;
+  padding: 110px 0;
+  border-top: 1px solid var(--line);
+}
+.sectionHeader {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 60px;
+}
+.sectionEyebrow {
+  font: 700 11px "DM Mono", monospace;
+  letter-spacing: .16em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+h2.sectionTitle {
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: clamp(32px, 4.5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+p.sectionSub {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.featureCard {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: all .25s ease;
+}
+.featureCard:hover {
+  background: var(--card-hover);
+  border-color: var(--card-border-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+.featureIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+.featureCard h3 {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.featureCard p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 48px;
+}
+.featurePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.featurePill span.icon {
+  color: var(--text-primary);
+}
+
+/* ==================== SCREENS SECTION ==================== */
+.screensList {
+  display: flex;
+  flex-direction: column;
+  gap: 90px;
+}
+.screenRow {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 60px;
+  align-items: center;
+}
+.screenRow.reverse {
+  grid-template-columns: 1.25fr 1fr;
+}
+.screenRow.reverse .screenText {
+  order: 2;
+}
+.screenRow.reverse .screenImageWrapper {
+  order: 1;
+}
+
+.screenTag {
+  font: 700 11px "DM Mono", monospace;
+  letter-spacing: .15em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.screenText h3 {
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+  font-size: clamp(26px, 3.2vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+.screenText p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.screenBullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.screenBullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.bulletCheck {
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+.screenImageWrapper {
+  position: relative;
+  border-radius: 16px;
+  border: 1px solid var(--card-border);
+  background: #000;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  transition: transform .3s ease, border-color .3s ease;
+}
+.screenImageWrapper:hover {
+  transform: scale(1.02);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.screenImageWrapper img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ==================== MOBILE COMPANION BANNER ==================== */
+.mobileBanner {
+  background: linear-gradient(135deg, #131317 0%, #1a1a22 100%);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 48px 40px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 40px;
+  align-items: center;
+  margin-top: 40px;
+}
+.mobileBanner h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+}
+.mobileBanner p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.65;
+  margin-bottom: 24px;
+}
+.mobileFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mobileFeatureItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ==================== DOWNLOAD SECTION ==================== */
+.downloadGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 30px;
+}
+.downloadCard {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 32px 26px;
+  display: flex;
+  flex-direction: column;
+  transition: all .25s ease;
+}
+.downloadCard.detected {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.05);
+}
+.downloadHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.downloadOsTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.detectedBadge {
+  font: 700 10px "DM Mono", monospace;
+  letter-spacing: .08em;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  text-transform: uppercase;
+}
+.downloadLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  flex: 1;
+}
+.downloadLinkBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: all .2s ease;
+}
+.downloadLinkBtn:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+.downloadNote {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+
+/* ==================== CHANGELOG HIGHLIGHTS ==================== */
+.changelogList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.changelogItem {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+.changelogMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.changelogVersion {
+  font: 700 14px "DM Mono", monospace;
+  color: #fff;
+}
+.changelogDate {
+  font: 11px "DM Mono", monospace;
+  color: var(--text-muted);
+}
+.changelogTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.changelogDetails {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ==================== FOOTER ==================== */
+footer.nocturneFooter {
+  border-top: 1px solid var(--line);
+  padding: 60px 0 40px;
+  background: #070709;
+}
+.footerFlex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 16px;
+}
+.footerBrand img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+.footerDisclaimer {
+  max-width: 640px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.footerNavLinks {
+  display: flex;
+  gap: 24px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.footerNavLinks a:hover {
+  color: #fff;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 960px) {
+  .navMenu { display: none; }
+  .featureGrid { grid-template-columns: 1fr 1fr; }
+  .downloadGrid { grid-template-columns: 1fr; }
+  .screenRow, .screenRow.reverse {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .screenRow.reverse .screenText { order: 1; }
+  .screenRow.reverse .screenImageWrapper { order: 2; }
+  .mobileBanner { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .featureGrid { grid-template-columns: 1fr; }
+  .heroSection { padding: 60px 0 80px; }
+  h1.heroTitle { font-size: 42px; }
+  .btnCtaPrimary, .btnCtaSecondary { width: 100%; justify-content: center; }
+  .showcaseWindow { border-radius: 10px; }
+  .windowBar { height: 30px; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambientGlow" aria-hidden="true"></div>
+
+<!-- NAVIGATION BAR -->
+<header class="nocturneNav">
+  <div class="wrap navContainer">
+    <a href="#" class="navBrand">
+      <img src="assets/logo.png" alt="Nocturne Logo">
+      <span>Nocturne Music</span>
+    </a>
+
+    <nav class="navMenu">
+      <a href="#features">Features</a>
+      <a href="#screens">Screens</a>
+      <a href="#mobile">Mobile</a>
+      <a href="#download">Download</a>
+      <a href="#releases">Releases</a>
+    </nav>
+
+    <div class="navRight">
+      <a href="../" class="btnBackPortfolio" title="Return to Neo's portfolio">
+        <span>← Portfolio</span>
+      </a>
+      <a href="https://github.com/Neo-XD/nocturne-music" target="_blank" rel="noopener" class="btnGithubNav">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        <span>GitHub</span>
+        <span class="starCount" id="starCount">★ 12</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- HERO SECTION -->
+  <section class="heroSection">
+    <div class="wrap">
+      <div class="heroBadge">
+        <span class="badgeDot"></span>
+        <span>Free · Open Source · Linux, Windows & Android</span>
+      </div>
+
+      <h1 class="heroTitle">Your music. Ad-free. Native.</h1>
+      <p class="heroDesc">
+        Nocturne is a lightweight desktop player for YouTube Music. Search any song, hit play, and listen without ads — no browser, no premium, no bloat.
+      </p>
+
+      <div class="heroCtas">
+        <a id="heroPrimaryDownload" href="#download" class="btnCtaPrimary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          <span id="heroDownloadLabel">Download Nocturne</span>
+        </a>
+        <a href="https://github.com/Neo-XD/nocturne-music" target="_blank" rel="noopener" class="btnCtaSecondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>View on GitHub ↗</span>
+        </a>
+      </div>
+
+      <div class="heroMetaNote">
+        Latest release <strong id="liveVersionHero">v0.6.7</strong> · Auto-updates included
+      </div>
+
+      <!-- MAIN HERO SHOWCASE IMAGE -->
+      <div class="heroShowcase">
+        <div class="showcaseWindow">
+          <div class="windowBar">
+            <div class="windowDots">
+              <span class="windowDot" style="background:#ff5f56;"></span>
+              <span class="windowDot" style="background:#ffbd2e;"></span>
+              <span class="windowDot" style="background:#27c93f;"></span>
+            </div>
+            <div class="windowTitle">Nocturne Music — Home & Queue</div>
+          </div>
+          <img src="assets/screen-playlist.webp" alt="Nocturne Music player showing playlist queue and modern monochrome interface" loading="eager">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY NOCTURNE / FEATURES GRID -->
+  <section id="features" class="sectionBlock">
+    <div class="wrap">
+      <div class="sectionHeader">
+        <div class="sectionEyebrow">Why Nocturne</div>
+        <h2 class="sectionTitle">Everything the web player should have been</h2>
+        <p class="sectionSub">Built from the ground up for high fidelity, instant performance, and distraction-free listening.</p>
+      </div>
+
+      <div class="featureGrid">
+        <!-- Feature 1 -->
+        <div class="featureCard">
+          <div class="featureIcon">🚫</div>
+          <h3>No ads, ever</h3>
+          <p>Nocturne plays the audio stream directly, so there is nothing to interrupt. No video pre-rolls, no ad breaks, no subscription needed.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="featureCard">
+          <div class="featureIcon">⚡</div>
+          <h3>Light on your PC</h3>
+          <p>A native Rust core and Tauri architecture instead of a bundled browser. Opens instantly, sips memory, and keeps your fans quiet.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="featureCard">
+          <div class="featureIcon">🎧</div>
+          <h3>Gapless, tuned sound</h3>
+          <p>mpv-powered audio engine with true gapless playback, loudness normalization, and custom equalizer profiles.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="featureCard">
+          <div class="featureIcon">🎤</div>
+          <h3>Lyrics that follow along</h3>
+          <p>Time-synced live lyrics scroll automatically with the song, line-by-line and syllable-by-syllable with karaoke timing.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="featureCard">
+          <div class="featureIcon">👥</div>
+          <h3>Listen Together</h3>
+          <p>Host shared listening sessions, generate an invite code, and stream music in perfect real-time synchronization with friends.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="featureCard">
+          <div class="featureIcon">📚</div>
+          <h3>Your library, intact</h3>
+          <p>Sign in once and your playlists, likes, artists, albums, and subscriptions are right there. Any changes sync back to YouTube Music.</p>
+        </div>
+      </div>
+
+      <div class="pillRow">
+        <span class="featurePill"><span class="icon">⌨️</span> Media keys & shortcuts</span>
+        <span class="featurePill"><span class="icon">📊</span> Last.fm scrobbling</span>
+        <span class="featurePill"><span class="icon">🎮</span> Discord Rich Presence</span>
+        <span class="featurePill"><span class="icon">📁</span> Multi-level playlist folders</span>
+        <span class="featurePill"><span class="icon">✨</span> Fluid glass & ambient themes</span>
+        <span class="featurePill"><span class="icon">🔄</span> Seamless auto-updates</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS DEEP DIVE -->
+  <section id="screens" class="sectionBlock">
+    <div class="wrap">
+      <div class="sectionHeader">
+        <div class="sectionEyebrow">Interface Showcase</div>
+        <h2 class="sectionTitle">Designed for music lovers</h2>
+        <p class="sectionSub">A refined monochrome design that puts your artwork and audio front and center.</p>
+      </div>
+
+      <div class="screensList">
+        <!-- Screen 1: Lyrics -->
+        <div class="screenRow">
+          <div class="screenText">
+            <div class="screenTag">01 / Live Lyrics</div>
+            <h3>Sing every word</h3>
+            <p>Synced lyrics stay locked to the rhythm. The active lyric line illuminates with dynamic ambient glow while previous verses smoothly fade back.</p>
+            <ul class="screenBullets">
+              <li><span class="bulletCheck">✓</span> Word-by-word karaoke synchronization</li>
+              <li><span class="bulletCheck">✓</span> Customizable lyrics typography and local fonts</li>
+              <li><span class="bulletCheck">✓</span> Dual-source lyric fallback for maximum coverage</li>
+            </ul>
+          </div>
+          <div class="screenImageWrapper">
+            <img src="assets/screen-lyrics.webp" alt="Nocturne Music live synchronized lyrics view" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Screen 2: Artist Page -->
+        <div class="screenRow reverse">
+          <div class="screenText">
+            <div class="screenTag">02 / Discography</div>
+            <h3>Go down the rabbit hole</h3>
+            <p>Explore artists, albums, singles, moods, and mixes. The entire YouTube Music catalog rendered in a crisp, ultra-fast native window with instant search.</p>
+            <ul class="screenBullets">
+              <li><span class="bulletCheck">✓</span> Instant typeahead search with Ctrl+K focus</li>
+              <li><span class="bulletCheck">✓</span> High-resolution album artwork and artist bios</li>
+              <li><span class="bulletCheck">✓</span> Clean tracklist hierarchy and related recommendations</li>
+            </ul>
+          </div>
+          <div class="screenImageWrapper">
+            <img src="assets/screen-artist.webp" alt="Nocturne Music artist discography and album page" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Screen 3: Listen Together -->
+        <div class="screenRow">
+          <div class="screenText">
+            <div class="screenTag">03 / Social Playback</div>
+            <h3>Press play with friends</h3>
+            <p>Start a Listen Together session and share a quick invite code. Play, pause, seek, and queue adjustments stay synchronized for every participant.</p>
+            <ul class="screenBullets">
+              <li><span class="bulletCheck">✓</span> Sub-second playback synchronization</li>
+              <li><span class="bulletCheck">✓</span> Collaborative queue control with room permissions</li>
+              <li><span class="bulletCheck">✓</span> Works across local Wi-Fi, Tailscale, or public rooms</li>
+            </ul>
+          </div>
+          <div class="screenImageWrapper">
+            <img src="assets/screen-listen-together.webp" alt="Nocturne Music Listen Together session view" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOBILE COMPANION SECTION -->
+  <section id="mobile" class="sectionBlock">
+    <div class="wrap">
+      <div class="mobileBanner">
+        <div>
+          <div class="screenTag">Mobile Companion</div>
+          <h3>Nocturne Mobile for Android</h3>
+          <p>Built from scratch in Kotlin with Google's Material 3 Expressive UI. Take your music on the go or use your phone as a zero-PIN remote controller for your desktop.</p>
+          <div class="mobileFeatures">
+            <div class="mobileFeatureItem"><span class="bulletCheck">✓</span> Zero-PIN UDP broadcast remote discovery</div>
+            <div class="mobileFeatureItem"><span class="bulletCheck">✓</span> Bidirectional playback handoff with exact timestamp continuity</div>
+            <div class="mobileFeatureItem"><span class="bulletCheck">✓</span> Dynamic ambient backgrounds: Apple Music Fluid Blur & Live Mesh</div>
+          </div>
+        </div>
+        <div style="text-align: center;">
+          <a id="mobileDownloadBtn" href="https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk" class="btnCtaPrimary" style="display:inline-flex; width:auto;">
+            <span>Download APK v0.1 →</span>
+          </a>
+          <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">Compatible with Android 8.0+</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD HUB -->
+  <section id="download" class="sectionBlock">
+    <div class="wrap">
+      <div class="sectionHeader">
+        <div class="sectionEyebrow">Get Nocturne</div>
+        <h2 class="sectionTitle">Download for your platform</h2>
+        <p class="sectionSub">Free and open source. Install it, sign in with your account if you want your library, and hit play.</p>
+      </div>
+
+      <div class="downloadGrid">
+        <!-- Windows -->
+        <div class="downloadCard" id="cardWindows">
+          <div class="downloadHeader">
+            <div class="downloadOsTitle">
+              <span>🪟</span>
+              <span>Windows</span>
+            </div>
+            <span class="detectedBadge" id="badgeWindows" style="display:none;">Detected OS</span>
+          </div>
+          <div class="downloadLinks">
+            <a id="winExeLink" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64-setup.exe" class="downloadLinkBtn">
+              <span>Setup Installer (.exe)</span>
+              <span>↓</span>
+            </a>
+            <a id="winMsiLink" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi" class="downloadLinkBtn">
+              <span>MSI Package (.msi)</span>
+              <span>↓</span>
+            </a>
+          </div>
+          <div class="downloadNote">Windows 10 / 11 (64-bit). The EXE installer supports automatic in-app updates.</div>
+        </div>
+
+        <!-- Linux -->
+        <div class="downloadCard" id="cardLinux">
+          <div class="downloadHeader">
+            <div class="downloadOsTitle">
+              <span>🐧</span>
+              <span>Linux</span>
+            </div>
+            <span class="detectedBadge" id="badgeLinux" style="display:none;">Detected OS</span>
+          </div>
+          <div class="downloadLinks">
+            <a id="linuxAppImageLink" href="https://github.com/Neo-XD/nocturne-music/releases" class="downloadLinkBtn">
+              <span>AppImage (Universal)</span>
+              <span>↓</span>
+            </a>
+            <a id="linuxDebLink" href="https://github.com/Neo-XD/nocturne-music/releases" class="downloadLinkBtn">
+              <span>Debian / Ubuntu (.deb)</span>
+              <span>↓</span>
+            </a>
+            <a id="linuxRpmLink" href="https://github.com/Neo-XD/nocturne-music/releases" class="downloadLinkBtn">
+              <span>Fedora / RHEL (.rpm)</span>
+              <span>↓</span>
+            </a>
+          </div>
+          <div class="downloadNote">AppImage updates itself automatically via GitHub releases.</div>
+        </div>
+
+        <!-- Android -->
+        <div class="downloadCard" id="cardAndroid">
+          <div class="downloadHeader">
+            <div class="downloadOsTitle">
+              <span>🤖</span>
+              <span>Android</span>
+            </div>
+            <span class="detectedBadge" id="badgeAndroid" style="display:none;">Detected OS</span>
+          </div>
+          <div class="downloadLinks">
+            <a id="androidApkLink" href="https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk" class="downloadLinkBtn">
+              <span>Nocturne Mobile APK (.apk)</span>
+              <span>↓</span>
+            </a>
+            <a href="https://github.com/Neo-XD/nocturne-mobile" target="_blank" rel="noopener" class="downloadLinkBtn">
+              <span>Mobile Source Code</span>
+              <span>↗</span>
+            </a>
+          </div>
+          <div class="downloadNote">Standalone player & zero-PIN desktop remote control.</div>
+        </div>
+      </div>
+
+      <p style="text-align: center; color: var(--text-muted); font-size: 14px;">
+        Looking for older releases or source archives? <a href="https://github.com/Neo-XD/nocturne-music/releases" target="_blank" rel="noopener" style="text-decoration: underline; color: var(--text-primary);">View all releases on GitHub →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- RECENT RELEASES & CHANGELOG -->
+  <section id="releases" class="sectionBlock">
+    <div class="wrap">
+      <div class="sectionHeader">
+        <div class="sectionEyebrow">Version History</div>
+        <h2 class="sectionTitle">Latest release notes</h2>
+        <p class="sectionSub">Highlights from recent Nocturne updates.</p>
+      </div>
+
+      <div class="changelogList">
+        <div class="changelogItem">
+          <div class="changelogMeta">
+            <span class="changelogVersion">Nocturne Desktop v0.6.7</span>
+            <span class="changelogDate">29 Aug 2026</span>
+          </div>
+          <div class="changelogTitle">Seamless remote device sync & pairing</div>
+          <div class="changelogDetails">
+            Zero-PIN remote pairing with UDP discovery and direct WebSockets over local Wi-Fi or Tailscale. Output Devices sidebar for one-click switching and bidirectional playback handoff between PC and phone.
+          </div>
+        </div>
+
+        <div class="changelogItem">
+          <div class="changelogMeta">
+            <span class="changelogVersion">Nocturne Desktop v0.6.6</span>
+            <span class="changelogDate">29 Aug 2026</span>
+          </div>
+          <div class="changelogTitle">Remote server, Discord presence & library sync</div>
+          <div class="changelogDetails">
+            Embedded remote server with QR pairing, official Discord Rich Presence with progress and album artwork, context menus for saving/removing songs from YouTube Music library, and frosted-glass context menus.
+          </div>
+        </div>
+
+        <div class="changelogItem">
+          <div class="changelogMeta">
+            <span class="changelogVersion">Nocturne Desktop v0.6.5</span>
+            <span class="changelogDate">28 Aug 2026</span>
+          </div>
+          <div class="changelogTitle">Glassy theme and real-time GPU background</div>
+          <div class="changelogDetails">
+            Added the Glassy ambient theme with translucent frosted-glass panels, real-time GPU fluid background, performance tab with low-spec controls, and persistent floating tab bars.
+          </div>
+        </div>
+
+        <div class="changelogItem">
+          <div class="changelogMeta">
+            <span class="changelogVersion">Nocturne Mobile v0.1</span>
+            <span class="changelogDate">29 Aug 2026</span>
+          </div>
+          <div class="changelogTitle">The first Nocturne Music release for Android</div>
+          <div class="changelogDetails">
+            Full remote-controller mode for desktop playback, standalone Android player with dynamic ambient backgrounds (Apple Music Fluid Blur, Live Mesh), and bidirectional handoff.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="nocturneFooter">
+  <div class="wrap footerFlex">
+    <div class="footerBrand">
+      <img src="assets/logo.png" alt="Nocturne Logo">
+      <span>Nocturne Music</span>
+    </div>
+    <p class="footerDisclaimer">
+      Nocturne Music is an unofficial, open-source client and is not affiliated with or endorsed by YouTube or Google. YouTube Music is a trademark of Google LLC.
+    </p>
+    <div class="footerNavLinks">
+      <a href="../">Neo-XD Portfolio</a>
+      <a href="https://github.com/Neo-XD/nocturne-music" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/Neo-XD/nocturne-music/blob/master/LICENSE" target="_blank" rel="noopener">GPL-3.0 License</a>
+      <a href="#top">Back to top ↑</a>
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace;">
+      Created by Amritanshu Praveen (Neo-XD)
+    </div>
+  </div>
+</footer>
+
+<!-- DYNAMIC SCRIPT FOR OS DETECTION, GITHUB STARS & RELEASES -->
+<script>
+(function(){
+  "use strict";
+
+  const REPO = "Neo-XD/nocturne-music";
+  const GITHUB_API_RELEASE = `https://api.github.com/repos/${REPO}/releases/latest`;
+  const GITHUB_API_REPO = `https://api.github.com/repos/${REPO}`;
+
+  // 1. Detect User Operating System
+  function detectOS() {
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    if (userAgent.indexOf("win") !== -1) return "windows";
+    if (userAgent.indexOf("android") !== -1) return "android";
+    if (userAgent.indexOf("linux") !== -1) return "linux";
+    if (userAgent.indexOf("mac") !== -1) return "mac";
+    return "other";
+  }
+
+  const os = detectOS();
+  const heroBtn = document.getElementById("heroPrimaryDownload");
+  const heroLabel = document.getElementById("heroDownloadLabel");
+
+  if (os === "windows") {
+    document.getElementById("badgeWindows")?.style.setProperty("display", "inline-block");
+    document.getElementById("cardWindows")?.classList.add("detected");
+    if (heroLabel) heroLabel.textContent = "Download for Windows";
+  } else if (os === "linux") {
+    document.getElementById("badgeLinux")?.style.setProperty("display", "inline-block");
+    document.getElementById("cardLinux")?.classList.add("detected");
+    if (heroLabel) heroLabel.textContent = "Download for Linux";
+  } else if (os === "android") {
+    document.getElementById("badgeAndroid")?.style.setProperty("display", "inline-block");
+    document.getElementById("cardAndroid")?.classList.add("detected");
+    if (heroLabel) heroLabel.textContent = "Download Android APK";
+    if (heroBtn) heroBtn.href = "#mobile";
+  }
+
+  // 2. Fetch Live GitHub Stars
+  async function fetchRepoStars() {
+    try {
+      const res = await fetch(GITHUB_API_REPO);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.stargazers_count !== undefined) {
+        const starEl = document.getElementById("starCount");
+        if (starEl) starEl.textContent = `★ ${data.stargazers_count}`;
+      }
+    } catch(e) {
+      console.warn("GitHub stars fetch:", e);
+    }
+  }
+
+  // 3. Fetch Latest Release Info
+  async function fetchLatestRelease() {
+    try {
+      const res = await fetch(GITHUB_API_RELEASE);
+      if (!res.ok) return;
+      const release = await res.json();
+      const tag = release.tag_name || "v0.6.7";
+
+      const heroVer = document.getElementById("liveVersionHero");
+      if (heroVer) heroVer.textContent = tag;
+
+      // Update download links if available in release assets
+      const assets = release.assets || [];
+      const exeAsset = assets.find(a => /setup.*\.exe$/i.test(a.name) || /\.exe$/i.test(a.name));
+      const msiAsset = assets.find(a => /\.msi$/i.test(a.name));
+      const appImageAsset = assets.find(a => /\.AppImage$/i.test(a.name));
+      const debAsset = assets.find(a => /\.deb$/i.test(a.name));
+      const rpmAsset = assets.find(a => /\.rpm$/i.test(a.name));
+
+      if (exeAsset) document.getElementById("winExeLink")?.setAttribute("href", exeAsset.browser_download_url);
+      if (msiAsset) document.getElementById("winMsiLink")?.setAttribute("href", msiAsset.browser_download_url);
+      if (appImageAsset) document.getElementById("linuxAppImageLink")?.setAttribute("href", appImageAsset.browser_download_url);
+      if (debAsset) document.getElementById("linuxDebLink")?.setAttribute("href", debAsset.browser_download_url);
+      if (rpmAsset) document.getElementById("linuxRpmLink")?.setAttribute("href", rpmAsset.browser_download_url);
+
+      if (os === "windows" && exeAsset && heroBtn) {
+        heroBtn.href = exeAsset.browser_download_url;
+      } else if (os === "linux" && appImageAsset && heroBtn) {
+        heroBtn.href = appImageAsset.browser_download_url;
+      }
+    } catch(e) {
+      console.warn("GitHub release fetch:", e);
+    }
+  }
+
+  fetchRepoStars();
+  fetchLatestRelease();
+})();
+</script>
+
+</body>
+</html>
