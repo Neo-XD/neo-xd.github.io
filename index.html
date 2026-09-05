@@ -844,7 +844,7 @@ footer {
           <a class="btn" href="https://www.youtube.com/@MRXNeoYT" target="_blank" rel="noopener">YouTube ↗</a>
         </div>
       </div>
-      <div class="heroAside"><p>&quot;The world is your canvas, so take up your brush and</p><p style="color: #ff6b6b;"> <em><strong><strong>paint the world red</strong></strong></em>&quot;.</p></div>
+      <div class="heroAside"><p>&quot;The world is your canvas, so take up your brush and <em><strong><strong>paint the world red</strong></strong></em>&quot;.</p></div>
     </div>
   </header>
 
@@ -1062,11 +1062,11 @@ footer {
   const MUSIC_MANIFEST = "https://raw.githubusercontent.com/Neo-XD/nocturne-music/main/version.json";
   const MOBILE_MANIFEST = "https://raw.githubusercontent.com/Neo-XD/nocturne-mobile/main/version.json";
   const FALLBACK = {
-    music: "unable to find latest release",
-    mobile: "unable to find latest release",
-    exe: "unable to find latest release",
-    msi: "unable to find latest release",
-    apk: "unable to find latest release"
+    music: "v0.7-d",
+    mobile: "v0.1",
+    exe: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64-setup.exe",
+    msi: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi",
+    apk: "https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk"
   };
   const CHECK_INTERVAL = 30;
   let nextCheckAt = Date.now() + CHECK_INTERVAL * 1000;
@@ -1078,7 +1078,7 @@ footer {
   function setDirect(id, url, label){
     const el = $(id);
     if (!el) return;
-    if (url) {
+    if (url && url !== "unable to find latest release") {
       el.href = url;
       el.textContent = label;
       el.target = "_blank";
@@ -1116,66 +1116,106 @@ footer {
     return null;
   }
 
-  async function getLatestRelease(apiUrl, manifestUrl){
-    try {
-      return { source: "github", data: await fetchJson(apiUrl) };
-    } catch (apiError) {
-      try {
-        return { source: "manifest", data: await fetchJson(manifestUrl) };
-      } catch (manifestError) {
-        throw new Error("Release and manifest unavailable");
-      }
-    }
-  }
-
   async function updateMusic(){
     try {
-      const result = await getLatestRelease(
-        "https://api.github.com/repos/Neo-XD/nocturne-music/releases/latest",
-        MUSIC_MANIFEST
-      );
-      const m = result.data;
-      const version = m.tag_name || m.version || "Latest";
-      const downloads = m.downloads || {};
-      let exe = downloads.exe || m.exe || null;
-      let msi = downloads.msi || m.msi || null;
+      let exe = null;
+      let msi = null;
+      let version = null;
 
-      if (result.source === "github") {
-        exe ||= findAsset(m, [/setup.*\.exe$/i, /\.exe$/i]);
-        msi ||= findAsset(m, [/\.msi$/i]);
+      try {
+        const res = await fetch("https://api.github.com/repos/Neo-XD/nocturne-music/releases", {
+          cache: "no-store",
+          headers: { "Accept": "application/vnd.github+json" }
+        });
+        if (res.ok) {
+          const releases = await res.json();
+          if (Array.isArray(releases) && releases.length > 0) {
+            version = releases[0].tag_name || releases[0].name || "";
+            for (const rel of releases) {
+              const assets = Array.isArray(rel.assets) ? rel.assets : [];
+              if (!exe) {
+                const found = assets.find(a => /setup.*\.exe$/i.test(a.name || "") || /\.exe$/i.test(a.name || ""));
+                if (found) exe = found.browser_download_url;
+              }
+              if (!msi) {
+                const found = assets.find(a => /\.msi$/i.test(a.name || ""));
+                if (found) msi = found.browser_download_url;
+              }
+              if (exe && msi) break;
+            }
+          }
+        }
+      } catch (e) {
+        try {
+          const m = await fetchJson(MUSIC_MANIFEST);
+          version = m.tag_name || m.version || null;
+          exe = m.downloads?.exe || m.exe || null;
+          msi = m.downloads?.msi || m.msi || null;
+        } catch (e2) {}
       }
+
+      version ||= FALLBACK.music;
+      exe ||= FALLBACK.exe;
+      msi ||= FALLBACK.msi;
 
       text("musicVersion", version);
       if (exe) setDirect("musicExe", exe, "Download EXE " + version + " →");
       if (msi) setDirect("musicMsi", msi, "Download MSI " + version + " →");
       $("musicDot")?.classList.add("live");
+      text("musicStatus", "✓ Direct downloads ready · " + version);
     } catch (error) {
       $("musicDot")?.classList.remove("live");
-      text("musicStatus", "✓ Direct downloads ready · v" + FALLBACK.music);
+      text("musicVersion", FALLBACK.music);
+      if (FALLBACK.exe) setDirect("musicExe", FALLBACK.exe, "Download EXE →");
+      if (FALLBACK.msi) setDirect("musicMsi", FALLBACK.msi, "Download MSI →");
+      text("musicStatus", "✓ Direct downloads ready · " + FALLBACK.music);
     }
   }
 
   async function updateMobile(){
     try {
-      const result = await getLatestRelease(
-        "https://api.github.com/repos/Neo-XD/nocturne-mobile/releases/latest",
-        MOBILE_MANIFEST
-      );
-      const m = result.data;
-      const version = m.tag_name || m.version || "Latest";
-      const downloads = m.downloads || {};
-      let apk = m.apk || downloads.apk || null;
+      let apk = null;
+      let version = null;
 
-      if (result.source === "github") {
-        apk ||= findAsset(m, [/\.apk$/i]);
+      try {
+        const res = await fetch("https://api.github.com/repos/Neo-XD/nocturne-mobile/releases", {
+          cache: "no-store",
+          headers: { "Accept": "application/vnd.github+json" }
+        });
+        if (res.ok) {
+          const releases = await res.json();
+          if (Array.isArray(releases)) {
+            for (const rel of releases) {
+              const assets = Array.isArray(rel.assets) ? rel.assets : [];
+              const found = assets.find(a => /\.apk$/i.test(a.name || ""));
+              if (found && found.browser_download_url) {
+                apk = found.browser_download_url;
+                version = rel.tag_name || rel.name || "";
+                break;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        try {
+          const m = await fetchJson(MOBILE_MANIFEST);
+          version = m.tag_name || m.version || null;
+          apk = m.apk || m.downloads?.apk || null;
+        } catch (e2) {}
       }
 
+      version ||= FALLBACK.mobile;
+      apk ||= FALLBACK.apk;
+
       text("mobileVersion", version);
-      if (apk) setDirect("apkButton", apk, "Download APK " + version + " →");
+      setDirect("apkButton", apk, "Download APK " + version + " →");
       $("mobileDot")?.classList.add("live");
+      text("mobileStatus", "✓ Direct APK ready · " + version);
     } catch (error) {
       $("mobileDot")?.classList.remove("live");
-      text("mobileStatus", "✓ Direct APK ready · v" + FALLBACK.mobile);
+      text("mobileVersion", FALLBACK.mobile);
+      setDirect("apkButton", FALLBACK.apk, "Download APK " + FALLBACK.mobile + " →");
+      text("mobileStatus", "✓ Direct APK ready · " + FALLBACK.mobile);
     }
   }
 

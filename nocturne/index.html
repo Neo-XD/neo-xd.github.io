@@ -975,10 +975,6 @@ footer.nocturneFooter {
               <span>Setup Installer (.exe)</span>
               <span>↓</span>
             </a>
-            <a id="winMsiLink" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi" class="downloadLinkBtn">
-              <span>MSI Package (.msi)</span>
-              <span>↓</span>
-            </a>
           </div>
           <div class="downloadNote">Windows 10 / 11 (64-bit). The EXE installer supports automatic in-app updates.</div>
         </div>
@@ -999,10 +995,6 @@ footer.nocturneFooter {
             </a>
             <a id="linuxDebLink" href="https://github.com/Neo-XD/nocturne-music/releases" class="downloadLinkBtn">
               <span>Debian / Ubuntu (.deb)</span>
-              <span>↓</span>
-            </a>
-            <a id="linuxRpmLink" href="https://github.com/Neo-XD/nocturne-music/releases" class="downloadLinkBtn">
-              <span>Fedora / RHEL (.rpm)</span>
               <span>↓</span>
             </a>
           </div>
@@ -1124,8 +1116,11 @@ footer.nocturneFooter {
   "use strict";
 
   const REPO = "Neo-XD/nocturne-music";
-  const GITHUB_API_RELEASE = `https://api.github.com/repos/${REPO}/releases/latest`;
+  const GITHUB_API_RELEASES = `https://api.github.com/repos/${REPO}/releases`;
   const GITHUB_API_REPO = `https://api.github.com/repos/${REPO}`;
+
+  const MOBILE_REPO = "Neo-XD/nocturne-mobile";
+  const GITHUB_API_MOBILE_RELEASES = `https://api.github.com/repos/${MOBILE_REPO}/releases`;
 
   // 1. Detect User Operating System
   function detectOS() {
@@ -1171,30 +1166,34 @@ footer.nocturneFooter {
     }
   }
 
-  // 3. Fetch Latest Release Info
+  // 3. Fetch Desktop Release Info
   async function fetchLatestRelease() {
     try {
-      const res = await fetch(GITHUB_API_RELEASE);
+      const res = await fetch(GITHUB_API_RELEASES);
       if (!res.ok) return;
-      const release = await res.json();
-      const tag = release.tag_name || "v0.6.7";
+      const releases = await res.json();
+      if (!Array.isArray(releases) || releases.length === 0) return;
 
+      const latestTag = releases[0]?.tag_name || "v0.7.0-d";
       const heroVer = document.getElementById("liveVersionHero");
-      if (heroVer) heroVer.textContent = tag;
+      if (heroVer) heroVer.textContent = latestTag;
 
-      // Update download links if available in release assets
-      const assets = release.assets || [];
-      const exeAsset = assets.find(a => /setup.*\.exe$/i.test(a.name) || /\.exe$/i.test(a.name));
-      const msiAsset = assets.find(a => /\.msi$/i.test(a.name));
-      const appImageAsset = assets.find(a => /\.AppImage$/i.test(a.name));
-      const debAsset = assets.find(a => /\.deb$/i.test(a.name));
-      const rpmAsset = assets.find(a => /\.rpm$/i.test(a.name));
+      // Find the newest release that has an exe asset, and one that has an AppImage / deb asset
+      let exeAsset = null;
+      let appImageAsset = null;
+      let debAsset = null;
+
+      for (const rel of releases) {
+        const assets = Array.isArray(rel.assets) ? rel.assets : [];
+        if (!exeAsset) exeAsset = assets.find(a => /setup.*\.exe$/i.test(a.name) || /\.exe$/i.test(a.name));
+        if (!appImageAsset) appImageAsset = assets.find(a => /\.AppImage$/i.test(a.name));
+        if (!debAsset) debAsset = assets.find(a => /\.deb$/i.test(a.name));
+        if (exeAsset && appImageAsset && debAsset) break;
+      }
 
       if (exeAsset) document.getElementById("winExeLink")?.setAttribute("href", exeAsset.browser_download_url);
-      if (msiAsset) document.getElementById("winMsiLink")?.setAttribute("href", msiAsset.browser_download_url);
       if (appImageAsset) document.getElementById("linuxAppImageLink")?.setAttribute("href", appImageAsset.browser_download_url);
       if (debAsset) document.getElementById("linuxDebLink")?.setAttribute("href", debAsset.browser_download_url);
-      if (rpmAsset) document.getElementById("linuxRpmLink")?.setAttribute("href", rpmAsset.browser_download_url);
 
       if (os === "windows" && exeAsset && heroBtn) {
         heroBtn.href = exeAsset.browser_download_url;
@@ -1202,12 +1201,53 @@ footer.nocturneFooter {
         heroBtn.href = appImageAsset.browser_download_url;
       }
     } catch(e) {
-      console.warn("GitHub release fetch:", e);
+      console.warn("GitHub desktop release fetch:", e);
+    }
+  }
+
+  // 4. Fetch Android Mobile Release Info (Fix: ensures APK is fetched even if newest tag has no assets)
+  async function fetchMobileRelease() {
+    try {
+      const res = await fetch(GITHUB_API_MOBILE_RELEASES);
+      if (!res.ok) return;
+      const releases = await res.json();
+      if (!Array.isArray(releases) || releases.length === 0) return;
+
+      let apkUrl = null;
+      let apkVersion = null;
+
+      for (const rel of releases) {
+        const assets = Array.isArray(rel.assets) ? rel.assets : [];
+        const found = assets.find(a => /\.apk$/i.test(a.name || ""));
+        if (found && found.browser_download_url) {
+          apkUrl = found.browser_download_url;
+          apkVersion = rel.tag_name || rel.name || "";
+          break;
+        }
+      }
+
+      if (apkUrl) {
+        const mobileBtn = document.getElementById("mobileDownloadBtn");
+        if (mobileBtn) {
+          mobileBtn.href = apkUrl;
+          const span = mobileBtn.querySelector("span");
+          if (span && apkVersion) span.textContent = `Download APK ${apkVersion} →`;
+        }
+        const cardLink = document.getElementById("androidApkLink");
+        if (cardLink) {
+          cardLink.href = apkUrl;
+          const span = cardLink.querySelector("span:first-child");
+          if (span && apkVersion) span.textContent = `Nocturne Mobile APK (${apkVersion})`;
+        }
+      }
+    } catch(e) {
+      console.warn("GitHub mobile release fetch:", e);
     }
   }
 
   fetchRepoStars();
   fetchLatestRelease();
+  fetchMobileRelease();
 })();
 </script>
 
