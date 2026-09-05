@@ -939,6 +939,16 @@ footer {
       <div class="releaseNotes">
         <div class="releaseGroup">Nocturne Music — Desktop</div>
         <article class="releaseItem">
+          <div class="releaseMeta"><strong>v0.7-d</strong><span class="releaseDate">Sept 2 2026</span></div>
+          <h3>Bug fixes and performance improvements.</h3>
+          <ul>
+            <li>Added hardware acceleration.</li>
+            <li>Re-added PIN authentication for remote control features.</li>
+            <li>Simplified last.fm integration.</li>
+            <li>Minor UI tweaks and visual improvements across the app.</li>
+            <li>Fullscreen player truly goes to fullscreen rather than just filling in the window.</li>
+          </ul>
+        <article class="releaseItem">
           <div class="releaseMeta"><strong>v0.6.7</strong><span class="releaseDate">29 Aug 2026</span></div>
           <h3>Seamless remote device sync.</h3>
           <ul>
@@ -1007,6 +1017,14 @@ footer {
 
         <div class="releaseGroup">Nocturne Mobile — Android</div>
         <article class="releaseItem">
+          <div class="releaseMeta"><strong>v0.2-m</strong><span class="releaseDate">2 Sept 2026</span></div>
+          <h3>Bug fixes and performance improvements.</h3>
+          <ul>
+            <li>added the base for a better sync</li>
+            <li>improved navigation</li>
+            <li>cleaned up some code</li>
+          </ul>
+        <article class="releaseItem">
           <div class="releaseMeta"><strong>v0.1</strong><span class="releaseDate">29 Aug 2026</span></div>
           <h3>The first Nocturne Music release for Android.</h3>
           <ul>
@@ -1024,7 +1042,7 @@ footer {
 
 <footer>
   <div class="wrap footerContent">
-    <div>© <span id="year"></span> Amritanshu Praveen / Neo-XD and Deepak Chowdary / chowdarydeepak735-bot</div>
+    <div>© <span id="year"></span> Amritanshu Praveen </div>
     <div class="footerLinks">
       <a href="./nocturne/">Nocturne UI</a>
       <a href="https://github.com/Neo-XD" target="_blank" rel="noopener">GitHub</a>
@@ -1042,11 +1060,11 @@ footer {
   const MUSIC_MANIFEST = "https://raw.githubusercontent.com/Neo-XD/nocturne-music/main/version.json";
   const MOBILE_MANIFEST = "https://raw.githubusercontent.com/Neo-XD/nocturne-mobile/main/version.json";
   const FALLBACK = {
-    music: "v0.6.7",
-    mobile: "v0.1",
-    exe: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64-setup.exe",
-    msi: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi",
-    apk: "https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk"
+    music: "unable to find latest release",
+    mobile: "unable to find latest release",
+    exe: "unable to find latest release",
+    msi: "unable to find latest release",
+    apk: "unable to find latest release"
   };
   const CHECK_INTERVAL = 30;
   let nextCheckAt = Date.now() + CHECK_INTERVAL * 1000;
