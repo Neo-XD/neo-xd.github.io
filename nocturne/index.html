@@ -779,7 +779,7 @@ footer.nocturneFooter {
       </div>
 
       <div class="heroMetaNote">
-        Latest release <strong id="liveVersionHero">v0.6.7</strong> · Auto-updates included
+        Latest release <strong id="liveVersionHero">v0.7-d</strong> · Auto-updates included
       </div>
 
       <!-- MAIN HERO SHOWCASE IMAGE -->
@@ -1042,6 +1042,17 @@ footer.nocturneFooter {
       <div class="changelogList">
         <div class="changelogItem">
           <div class="changelogMeta">
+            <span class="changelogVersion">Nocturne Desktop v0.7-d</span>
+            <span class="changelogDate">2 Sept 2026</span>
+          </div>
+          <div class="changelogTitle">Hardware acceleration, PIN auth & fullscreen polish</div>
+          <div class="changelogDetails">
+            Added hardware acceleration support, re-added PIN authentication for remote control features, simplified Last.fm integration, true borderless fullscreen player, and UI polish across the app.
+          </div>
+        </div>
+
+        <div class="changelogItem">
+          <div class="changelogMeta">
             <span class="changelogVersion">Nocturne Desktop v0.6.7</span>
             <span class="changelogDate">29 Aug 2026</span>
           </div>
@@ -1070,6 +1081,17 @@ footer.nocturneFooter {
           <div class="changelogTitle">Glassy theme and real-time GPU background</div>
           <div class="changelogDetails">
             Added the Glassy ambient theme with translucent frosted-glass panels, real-time GPU fluid background, performance tab with low-spec controls, and persistent floating tab bars.
+          </div>
+        </div>
+
+        <div class="changelogItem">
+          <div class="changelogMeta">
+            <span class="changelogVersion">Nocturne Mobile v0.2-m</span>
+            <span class="changelogDate">2 Sept 2026</span>
+          </div>
+          <div class="changelogTitle">Bug fixes, improved navigation & sync foundation</div>
+          <div class="changelogDetails">
+            Added the base for improved desktop sync, cleaner navigation hierarchy, performance improvements, and codebase cleanups.
           </div>
         </div>
 
@@ -1168,14 +1190,20 @@ footer.nocturneFooter {
 
   // 3. Fetch Desktop Release Info
   async function fetchLatestRelease() {
+    const heroVer = document.getElementById("liveVersionHero");
     try {
       const res = await fetch(GITHUB_API_RELEASES);
-      if (!res.ok) return;
+      if (!res.ok) {
+        if (heroVer) heroVer.textContent = "v0.7-d";
+        return;
+      }
       const releases = await res.json();
-      if (!Array.isArray(releases) || releases.length === 0) return;
+      if (!Array.isArray(releases) || releases.length === 0) {
+        if (heroVer) heroVer.textContent = "v0.7-d";
+        return;
+      }
 
-      const latestTag = releases[0]?.tag_name || "v0.7.0-d";
-      const heroVer = document.getElementById("liveVersionHero");
+      const latestTag = releases[0]?.tag_name || "v0.7-d";
       if (heroVer) heroVer.textContent = latestTag;
 
       // Find the newest release that has an exe asset, and one that has an AppImage / deb asset
@@ -1202,6 +1230,7 @@ footer.nocturneFooter {
       }
     } catch(e) {
       console.warn("GitHub desktop release fetch:", e);
+      if (heroVer) heroVer.textContent = "v0.7-d";
     }
   }
 
