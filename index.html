@@ -893,11 +893,11 @@ footer {
           <p><strong>The Start of an era.</strong> NeoXD's PC music client with a design not many hate. Built from one thought: <em>“Why isn't there a good looking YouTube Music client for all screen sizes and all orientations?”</em></p>
           <a href="./nocturne/" class="projectPromoLink">View Nocturne UI & Screens Page →</a>
           <div class="version">
-            <span id="musicDot" class="dot"></span>Current version: <strong id="musicVersion">v0.6.7</strong>
+            <span id="musicDot" class="dot"></span>Current version: <strong id="musicVersion">v0.7-d</strong>
           </div>
           <div id="musicStatus" class="status">Download Here: </div>
           <div class="buttons">
-            <a id="musicExe" class="btn dark" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64-setup.exe" target="_blank" rel="noopener">Download EXE →</a>
+            <a id="musicExe" class="btn dark" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.7.0-d/Nocturne.Music_0.7.0-d_x64-setup.exe" target="_blank" rel="noopener">Download EXE →</a>
             <a id="musicMsi" class="btn dark" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi" target="_blank" rel="noopener">Download MSI →</a>
             <a class="btn" href="./nocturne/">Explore UI ↗</a>
             <a class="btn" href="https://github.com/Neo-XD/nocturne-music/releases" target="_blank" rel="noopener">Releases ↗</a>
@@ -913,12 +913,12 @@ footer {
           <h3>Nocturne Mobile</h3>
           <p><strong>The Mobile Version.</strong> Built from scratch with Kotlin as a music player for your Android Phone and built to look great with Google's Material 3 Expressive UI and Sync capabilities for a better ecosystem.</p>
           <div class="version">
-            <span id="mobileDot" class="dot"></span>Current version: <strong id="mobileVersion">v0.1</strong>
+            <span id="mobileDot" class="dot"></span>Current version: <strong id="mobileVersion">v0.2-m</strong>
           </div>
 
           <div id="mobileStatus" class="status">Download Here: </div>
           <div class="buttons">
-            <a id="apkButton" class="btn dark" href="https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk" target="_blank" rel="noopener">Download APK v0.1 →</a>
+            <a id="apkButton" class="btn dark" href="https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.2.0-m/Nocturne-Music.v0.2-m.Universal.apk" target="_blank" rel="noopener">Download APK v0.2-m →</a>
             <a class="btn" href="https://github.com/Neo-XD/nocturne-mobile/releases" target="_blank" rel="noopener">Releases ↗</a>
           </div>
         </article>
@@ -1059,14 +1059,14 @@ footer {
 (function(){
   "use strict";
 
-  const MUSIC_MANIFEST = "https://raw.githubusercontent.com/Neo-XD/nocturne-music/main/version.json";
-  const MOBILE_MANIFEST = "https://raw.githubusercontent.com/Neo-XD/nocturne-mobile/main/version.json";
+  const MUSIC_MANIFEST = "./version.json";
+  const MOBILE_MANIFEST = "./version.json";
   const FALLBACK = {
     music: "v0.7-d",
-    mobile: "v0.1",
-    exe: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64-setup.exe",
+    mobile: "v0.2-m",
+    exe: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.7.0-d/Nocturne.Music_0.7.0-d_x64-setup.exe",
     msi: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi",
-    apk: "https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.1/Nocturne.Music.v0.1.apk"
+    apk: "https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.2.0-m/Nocturne-Music.v0.2-m.Universal.apk"
   };
   const CHECK_INTERVAL = 30;
   let nextCheckAt = Date.now() + CHECK_INTERVAL * 1000;
@@ -1146,11 +1146,15 @@ footer {
           }
         }
       } catch (e) {
+        console.warn("Desktop release fetch:", e);
+      }
+
+      if (!exe) {
         try {
           const m = await fetchJson(MUSIC_MANIFEST);
-          version = m.tag_name || m.version || null;
-          exe = m.downloads?.exe || m.exe || null;
-          msi = m.downloads?.msi || m.msi || null;
+          version = m.music?.display_name || m.music?.version || m.tag_name || version;
+          exe = m.music?.exe || m.downloads?.exe || exe;
+          msi = m.music?.msi || m.downloads?.msi || msi;
         } catch (e2) {}
       }
 
@@ -1184,23 +1188,27 @@ footer {
         });
         if (res.ok) {
           const releases = await res.json();
-          if (Array.isArray(releases)) {
+          if (Array.isArray(releases) && releases.length > 0) {
             for (const rel of releases) {
               const assets = Array.isArray(rel.assets) ? rel.assets : [];
               const found = assets.find(a => /\.apk$/i.test(a.name || ""));
               if (found && found.browser_download_url) {
                 apk = found.browser_download_url;
-                version = rel.tag_name || rel.name || "";
+                version = rel.name || rel.tag_name || "";
                 break;
               }
             }
           }
         }
       } catch (e) {
+        console.warn("Mobile release fetch:", e);
+      }
+
+      if (!apk) {
         try {
           const m = await fetchJson(MOBILE_MANIFEST);
-          version = m.tag_name || m.version || null;
-          apk = m.apk || m.downloads?.apk || null;
+          version = m.mobile?.display_name || m.mobile?.version || m.tag_name || version;
+          apk = m.mobile?.apk || m.downloads?.apk || apk;
         } catch (e2) {}
       }
 

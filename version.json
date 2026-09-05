@@ -1,0 +1,16 @@
+﻿{
+  "music": {
+    "version": "v0.7.0-d",
+    "tag_name": "v0.7.0-d",
+    "display_name": "v0.7-d",
+    "exe": "https://github.com/Neo-XD/nocturne-music/releases/download/v0.7.0-d/Nocturne.Music_0.7.0-d_x64-setup.exe",
+    "appimage": "https://github.com/Neo-XD/nocturne-music/releases/download/v0.7.0-d/Nocturne.Music_0.7.0-d_amd64.AppImage",
+    "deb": "https://github.com/Neo-XD/nocturne-music/releases/download/v0.7.0-d/Nocturne.Music_0.7.0-d_amd64.deb"
+  },
+  "mobile": {
+    "version": "v0.2.0-m",
+    "tag_name": "v0.2.0-m",
+    "display_name": "v0.2-m",
+    "apk": "https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.2.0-m/Nocturne-Music.v0.2-m.Universal.apk"
+  }
+}
