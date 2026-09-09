@@ -600,6 +600,28 @@ h2 {
   line-height: 1.7;
   margin: 0 0 16px;
 }
+.availabilityChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: 10px 0 12px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card-subtle);
+  color: var(--muted);
+  font: 10px "DM Mono", monospace;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+.chipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #29a45c;
+  box-shadow: 0 0 0 3px rgba(41, 164, 92, 0.12);
+}
 .projectPromoLink {
   display: inline-flex;
   align-items: center;
@@ -676,6 +698,11 @@ h2 {
   margin-top: 16px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
+}
+.releaseItems {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 .releaseItem {
   background: var(--card);
@@ -938,105 +965,10 @@ footer {
       </div>
       <div class="releaseNotes">
         <div class="releaseGroup">Nocturne Music — Desktop</div>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.7-d</strong><span class="releaseDate">Sept 2 2026</span></div>
-          <h3>Bug fixes and performance improvements.</h3>
-          <ul>
-            <li>Added hardware acceleration.</li>
-            <li>Re-added PIN authentication for remote control features.</li>
-            <li>Simplified last.fm integration.</li>
-            <li>Minor UI tweaks and visual improvements across the app.</li>
-            <li>Fullscreen player truly goes to fullscreen rather than just filling in the window.</li>
-          </ul>
-        </article>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.6.7</strong><span class="releaseDate">29 Aug 2026</span></div>
-          <h3>Seamless remote device sync.</h3>
-          <ul>
-            <li>Added zero-PIN remote pairing with UDP discovery and direct WebSocket connections over local Wi-Fi or Tailscale.</li>
-            <li>Added a dedicated Output Devices sidebar for one-click switching between desktop and connected mobile devices.</li>
-            <li>Moved LAN host details into Settings and added masked local-IP display.</li>
-            <li>Added bidirectional playback handoff between desktop and phone, preserving track, queue, and exact playback position.</li>
-            <li>Added real-time position, queue, and metadata synchronization.</li>
-          </ul>
-        </article>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.6.6</strong><span class="releaseDate">29 Aug 2026</span></div>
-          <h3>Remote control, Discord presence & library sync.</h3>
-          <ul>
-            <li>Added an embedded remote playback server with secure PIN authentication and QR pairing.</li>
-            <li>Added official Discord Rich Presence with artwork, progress, artist metadata, and YouTube Music links.</li>
-            <li>Added Save to Library / Remove from Library through context menus, with YouTube Music account synchronization.</li>
-            <li>Added frosted-glass context menus for the Glassy theme.</li>
-          </ul>
-        </article>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.6.5</strong><span class="releaseDate">28 Aug 2026</span></div>
-          <h3>Glassy visuals and performance controls.</h3>
-          <ul>
-            <li>Added the Glassy ambient theme with translucent frosted-glass panels and real-time GPU background.</li>
-            <li>Added detailed visual controls for Glassy and fullscreen backgrounds, including warping, brightness, blur, and saturation.</li>
-            <li>Added persistent floating tab bars with navigation arrows for Home and Library.</li>
-            <li>Added a Performance tab with low-spec controls, reduced transparency, and motion profiles.</li>
-          </ul>
-        </article>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.6.4</strong><span class="releaseDate">27 Aug 2026</span></div>
-          <h3>Nested library organization.</h3>
-          <ul>
-            <li>Added multi-level playlist folders with recursive nesting, collapsible trees, and cycle prevention.</li>
-            <li>Added drag-and-drop playlist/folder organization and breadcrumb-based unfiling.</li>
-            <li>Added Save Queue to Playlist, customizable keyboard-shortcut manager, and explicit-content playback filter.</li>
-          </ul>
-        </article>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.6.3</strong><span class="releaseDate">27 Aug 2026</span></div>
-          <h3>Folders, search and better lyrics.</h3>
-          <ul>
-            <li>Added playlist folders with artwork collage previews, creation/editing, and batch assignment.</li>
-            <li>Added sticky top search bar with typeahead suggestions and Ctrl+Space focus.</li>
-            <li>Added customizable lyrics-provider priority and Better Lyrics integration with syllable/word-level karaoke sync.</li>
-          </ul>
-        </article>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.6.2</strong><span class="releaseDate">26 Aug 2026</span></div>
-          <h3>Fullscreen controls and playback polish.</h3>
-          <ul>
-            <li>Added F11 borderless fullscreen player mode with ambient artwork and live lyrics.</li>
-            <li>Added expanded keyboard transport controls for play/pause, next/previous, shuffle, repeat, and mute.</li>
-          </ul>
-        </article>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.6</strong><span class="releaseDate">25 Aug 2026</span></div>
-          <h3>The Nocturne rebrand & player foundation.</h3>
-          <ul>
-            <li>Added dedicated fullscreen player with ambient artwork, live-synced karaoke lyrics, and keyboard controls.</li>
-            <li>Added docked Now Playing / Info sidebar and default monochrome theme.</li>
-            <li>Completed internal rebrand to Nocturne, including package/app identifiers, update endpoints, and tray handlers.</li>
-          </ul>
-        </article>
+        <div id="musicReleaseItems" class="releaseItems"></div>
 
         <div class="releaseGroup">Nocturne Mobile — Android</div>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.2-m</strong><span class="releaseDate">2 Sept 2026</span></div>
-          <h3>Bug fixes and performance improvements.</h3>
-          <ul>
-            <li>added the base for a better sync</li>
-            <li>improved navigation</li>
-            <li>cleaned up some code</li>
-          </ul>
-        </article>
-        <article class="releaseItem">
-          <div class="releaseMeta"><strong>v0.1</strong><span class="releaseDate">29 Aug 2026</span></div>
-          <h3>The first Nocturne Music release for Android.</h3>
-          <ul>
-            <li>Added zero-PIN remote discovery using UDP broadcast and WebSockets across local Wi-Fi and Tailscale.</li>
-            <li>Added full remote-controller mode for controlling desktop playback from Android.</li>
-            <li>Added bidirectional playback handoff between phone and desktop with exact timestamp continuation.</li>
-            <li>Added dynamic ambient player backgrounds: Gradient, Blur, Apple Music Fluid Blur, and Live Mesh.</li>
-            <li>Added synchronized Now Playing artwork, metadata, and live position with the desktop client.</li>
-          </ul>
-        </article>
+        <div id="mobileReleaseItems" class="releaseItems"></div>
       </div>
     </div>
   </section>
@@ -1227,15 +1159,84 @@ footer {
     }
   }
 
+  function escapeHTML(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function formatReleaseDate(value) {
+    if (!value) return "No date";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "No date";
+    return parsed.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  }
+
+  function bodyToList(body) {
+    if (!body || !body.trim()) return ["No changelog notes were published for this release."];
+    return body
+      .split(/\r?\n/)
+      .map(line => line.replace(/^[-*]\s*/, "").trim())
+      .filter(Boolean)
+      .slice(0, 8);
+  }
+
+  function renderReleases(repo, targetId, count = 5) {
+    const container = $(targetId);
+    if (!container) return;
+
+    fetch("https://api.github.com/repos/Neo-XD/" + repo + "/releases", {
+      cache: "no-store",
+      headers: { "Accept": "application/vnd.github+json" }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response.json();
+      })
+      .then(releases => {
+        if (!Array.isArray(releases)) return;
+        const items = releases.slice(0, count);
+        container.innerHTML = items.map(release => {
+          const title = release.name || release.tag_name || "Release";
+          const tag = release.tag_name || title;
+          const itemsHtml = bodyToList(release.body).map(line => `<li>${escapeHTML(line)}</li>`).join("");
+          return `<article class="releaseItem">
+            <div class="releaseMeta">
+              <strong>${escapeHTML(tag)}</strong>
+              <span class="releaseDate">${formatReleaseDate(release.published_at)}</span>
+            </div>
+            <h3>${escapeHTML(title)}</h3>
+            <ul>${itemsHtml}</ul>
+          </article>`;
+        }).join("");
+      })
+      .catch(error => {
+        console.warn(repo + " release notes fetch:", error);
+        container.innerHTML = `<article class="releaseItem"><div class="releaseMeta"><strong>GitHub</strong><span class="releaseDate">Unavailable</span></div><h3>Release notes unavailable</h3><ul><li>The changelog feed could not be loaded right now.</li></ul></article>`;
+      });
+  }
+
   async function updateAll(){
     if (updateInProgress) return;
     updateInProgress = true;
     try {
-      await Promise.allSettled([updateMusic(), updateMobile()]);
+      await Promise.allSettled([updateMusic(), updateMobile(), renderNocturneChangelogs()]);
     } finally {
       updateInProgress = false;
       nextCheckAt = Date.now() + CHECK_INTERVAL * 1000;
     }
+  }
+
+  async function renderNocturneChangelogs() {
+    renderReleases("nocturne-music", "musicReleaseItems", 4);
+    renderReleases("nocturne-mobile", "mobileReleaseItems", 4);
   }
 
   setDirect("musicExe", FALLBACK.exe, "Download EXE →");

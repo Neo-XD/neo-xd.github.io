@@ -542,6 +542,28 @@ p.sectionSub {
   font-size: 14px;
   color: var(--text-secondary);
 }
+.availabilityChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: 8px 0 16px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  font: 10px "DM Mono", monospace;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+.chipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
 
 /* ==================== DOWNLOAD SECTION ==================== */
 .downloadGrid {
@@ -935,6 +957,7 @@ footer.nocturneFooter {
           <div class="screenTag">Mobile Companion</div>
           <h3>Nocturne Mobile for Android</h3>
           <p>Built from scratch in Kotlin with Google's Material 3 Expressive UI. Take your music on the go or use your phone as a zero-PIN remote controller for your desktop.</p>
+          <div class="availabilityChip"><span class="chipDot"></span><span>Nocturne is available on Android</span></div>
           <div class="mobileFeatures">
             <div class="mobileFeatureItem"><span class="bulletCheck">✓</span> Zero-PIN UDP broadcast remote discovery</div>
             <div class="mobileFeatureItem"><span class="bulletCheck">✓</span> Bidirectional playback handoff with exact timestamp continuity</div>
