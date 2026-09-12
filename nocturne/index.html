@@ -736,9 +736,81 @@ footer.nocturneFooter {
   .featureGrid { grid-template-columns: 1fr; }
   .heroSection { padding: 60px 0 80px; }
   h1.heroTitle { font-size: 42px; }
-  .btnCtaPrimary, .btnCtaSecondary { width: 100%; justify-content: center; }
   .showcaseWindow { border-radius: 10px; }
   .windowBar { height: 30px; }
+}
+
+/* ==================== SECRET MODAL ==================== */
+.secretModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  padding: 20px;
+}
+.secretModalOverlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.secretModalCard {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 36px 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 255, 255, 0.04);
+  transform: scale(0.92) translateY(10px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  color: var(--text-primary);
+  position: relative;
+}
+.secretModalOverlay.active .secretModalCard {
+  transform: scale(1) translateY(0);
+}
+.secretModalBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+}
+.secretModalCard h3 {
+  margin: 0 0 14px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.secretModalCard p {
+  margin: 0 0 24px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+.secretModalCard .btnCtaPrimary {
+  display: inline-flex;
+  margin: auto;
+  min-width: 120px;
 }
 </style>
 </head>
@@ -1333,6 +1405,129 @@ footer.nocturneFooter {
   fetchRepoStars();
   fetchLatestRelease();
   fetchMobileRelease();
+})();
+</script>
+
+<!-- SECRET MODAL DIALOG -->
+<div id="secretModalOverlay" class="secretModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="secretModalCard">
+    <div class="secretModalBadge">✦ Secret Unlocked</div>
+    <h3 id="secretModalTitle">You found a secret!</h3>
+    <p id="secretModalText">The world is your canvas, so take up your brush and paint the world red.</p>
+    <button id="secretModalBtn" type="button" class="btnCtaPrimary">Close</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ============================================================
+  // [CONFIG] SECRET POPUP TEXT
+  // You can customize the title, message, and button text here:
+  // ============================================================
+  const SECRET_POPUP_CONFIG = {
+    title: "You found a secret!",
+    message: "\"The world is your canvas, so take up your brush and paint the world red.\"",
+    buttonText: "Close"
+  };
+
+  // DOM Elements
+  const modalOverlay = document.getElementById("secretModalOverlay");
+  const modalTitle = document.getElementById("secretModalTitle");
+  const modalText = document.getElementById("secretModalText");
+  const modalBtn = document.getElementById("secretModalBtn");
+
+  // Populate modal with configured text
+  if (modalTitle) modalTitle.textContent = SECRET_POPUP_CONFIG.title;
+  if (modalText) modalText.textContent = SECRET_POPUP_CONFIG.message;
+  if (modalBtn) modalBtn.textContent = SECRET_POPUP_CONFIG.buttonText;
+
+  function openSecretModal() {
+    if (!modalOverlay) return;
+    modalOverlay.classList.add("active");
+    modalOverlay.setAttribute("aria-hidden", "false");
+    modalBtn?.focus();
+  }
+
+  function closeSecretModal() {
+    if (!modalOverlay) return;
+    modalOverlay.classList.remove("active");
+    modalOverlay.setAttribute("aria-hidden", "true");
+  }
+
+  modalBtn?.addEventListener("click", closeSecretModal);
+  modalOverlay?.addEventListener("click", function(e) {
+    if (e.target === modalOverlay) closeSecretModal();
+  });
+
+  // Sequences definitions
+  // 1. Up x6 then immediately Down x7
+  const secretSequence = [
+    "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp", "ArrowUp",
+    "ArrowDown", "ArrowDown", "ArrowDown", "ArrowDown", "ArrowDown", "ArrowDown", "ArrowDown"
+  ];
+  let secretIndex = 0;
+  let secretTimer = null;
+
+  // 2. Konami Code (↑ ↑ ↓ ↓ ← → ← → B A)
+  const konamiSequence = [
+    "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
+    "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight",
+    "b", "a"
+  ];
+  let konamiIndex = 0;
+  let konamiTimer = null;
+
+  window.addEventListener("keydown", function(e) {
+    // Dismiss modal on Escape
+    if (e.key === "Escape" && modalOverlay?.classList.contains("active")) {
+      closeSecretModal();
+      return;
+    }
+
+    // Ignore keystrokes inside form controls
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.tagName === "SELECT" || activeEl.isContentEditable)) {
+      return;
+    }
+
+    const key = e.key;
+
+    // --- Check Secret 1 (Up x6 + Down x7) ---
+    clearTimeout(secretTimer);
+    if (key === secretSequence[secretIndex]) {
+      secretIndex++;
+      if (secretIndex === secretSequence.length) {
+        secretIndex = 0;
+        openSecretModal();
+      } else {
+        // Reset if inactive for more than 2.5 seconds
+        secretTimer = setTimeout(function() { secretIndex = 0; }, 2500);
+      }
+    } else {
+      // If mismatch, check if key is start of sequence again
+      secretIndex = (key === secretSequence[0]) ? 1 : 0;
+    }
+
+    // --- Check Secret 2 (Konami Code Rickroll) ---
+    clearTimeout(konamiTimer);
+    if (key.toLowerCase() === konamiSequence[konamiIndex].toLowerCase()) {
+      konamiIndex++;
+      if (konamiIndex === konamiSequence.length) {
+        konamiIndex = 0;
+        // Rickroll!
+        const win = window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank", "noopener,noreferrer");
+        if (!win) {
+          window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        }
+      } else {
+        konamiTimer = setTimeout(function() { konamiIndex = 0; }, 2500);
+      }
+    } else {
+      konamiIndex = (key.toLowerCase() === konamiSequence[0].toLowerCase()) ? 1 : 0;
+    }
+  });
 })();
 </script>
 
