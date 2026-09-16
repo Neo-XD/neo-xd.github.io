@@ -686,16 +686,28 @@ h2 {
 
 /* ==================== RELEASE NOTES ==================== */
 .releaseNotes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .releaseNotes {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+.releaseColumn {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 .releaseGroup {
   font: 700 12px "DM Mono", monospace;
   letter-spacing: .15em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-top: 16px;
+  margin-top: 0;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
@@ -996,7 +1008,6 @@ footer {
           <div id="musicStatus" class="status">Download Here: </div>
           <div class="buttons">
             <a id="musicExe" class="btn dark" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.7.0-d/Nocturne.Music_0.7.0-d_x64-setup.exe" target="_blank" rel="noopener">Download EXE →</a>
-            <a id="musicMsi" class="btn dark" href="https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi" target="_blank" rel="noopener">Download MSI →</a>
             <a class="btn" href="./nocturne/">Explore UI ↗</a>
             <a class="btn" href="https://github.com/Neo-XD/nocturne-music/releases" target="_blank" rel="noopener">Releases ↗</a>
           </div>
@@ -1011,12 +1022,12 @@ footer {
           <h3>Nocturne Mobile</h3>
           <p><strong>The Mobile Version.</strong> Built from scratch with Kotlin as a music player for your Android Phone and built to look great with Google's Material 3 Expressive UI and Sync capabilities for a better ecosystem.</p>
           <div class="version">
-            <span id="mobileDot" class="dot"></span>Current version: <strong id="mobileVersion">v0.2-m</strong>
+            <span id="mobileDot" class="dot"></span>Current version: <strong id="mobileVersion">v0.3-m</strong>
           </div>
 
           <div id="mobileStatus" class="status">Download Here: </div>
           <div class="buttons">
-            <a id="apkButton" class="btn dark" href="https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.2.0-m/Nocturne-Music.v0.2-m.Universal.apk" target="_blank" rel="noopener">Download APK v0.2-m →</a>
+            <a id="apkButton" class="btn dark" href="https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.2.0-m/Nocturne-Music.v0.2-m.Universal.apk" target="_blank" rel="noopener">Download APK v0.3-m →</a>
             <a class="btn" href="https://github.com/Neo-XD/nocturne-mobile/releases" target="_blank" rel="noopener">Releases ↗</a>
           </div>
         </article>
@@ -1035,11 +1046,15 @@ footer {
         </div>
       </div>
       <div class="releaseNotes">
-        <div class="releaseGroup">Nocturne Music — Desktop</div>
-        <div id="musicReleaseItems" class="releaseItems"></div>
+        <div class="releaseColumn">
+          <div class="releaseGroup">🖥️ Nocturne Music — Desktop</div>
+          <div id="musicReleaseItems" class="releaseItems"></div>
+        </div>
 
-        <div class="releaseGroup">Nocturne Mobile — Android</div>
-        <div id="mobileReleaseItems" class="releaseItems"></div>
+        <div class="releaseColumn">
+          <div class="releaseGroup">📱 Nocturne Mobile — Android</div>
+          <div id="mobileReleaseItems" class="releaseItems"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -1065,10 +1080,9 @@ footer {
   const MUSIC_MANIFEST = "./version.json";
   const MOBILE_MANIFEST = "./version.json";
   const FALLBACK = {
-    music: "v0.7-d",
-    mobile: "v0.2-m",
+    music: "v0.8.3",
+    mobile: "v0.3-m",
     exe: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.7.0-d/Nocturne.Music_0.7.0-d_x64-setup.exe",
-    msi: "https://github.com/Neo-XD/nocturne-music/releases/download/v0.6.7/Nocturne.Music_0.6.7_x64_en-US.msi",
     apk: "https://github.com/Neo-XD/nocturne-mobile/releases/download/v0.2.0-m/Nocturne-Music.v0.2-m.Universal.apk"
   };
   const CHECK_INTERVAL = 30;
@@ -1122,7 +1136,6 @@ footer {
   async function updateMusic(){
     try {
       let exe = null;
-      let msi = null;
       let version = null;
 
       try {
@@ -1140,11 +1153,7 @@ footer {
                 const found = assets.find(a => /setup.*\.exe$/i.test(a.name || "") || /\.exe$/i.test(a.name || ""));
                 if (found) exe = found.browser_download_url;
               }
-              if (!msi) {
-                const found = assets.find(a => /\.msi$/i.test(a.name || ""));
-                if (found) msi = found.browser_download_url;
-              }
-              if (exe && msi) break;
+              if (exe) break;
             }
           }
         }
@@ -1157,24 +1166,20 @@ footer {
           const m = await fetchJson(MUSIC_MANIFEST);
           version = m.music?.display_name || m.music?.version || m.tag_name || version;
           exe = m.music?.exe || m.downloads?.exe || exe;
-          msi = m.music?.msi || m.downloads?.msi || msi;
         } catch (e2) {}
       }
 
       version ||= FALLBACK.music;
       exe ||= FALLBACK.exe;
-      msi ||= FALLBACK.msi;
 
       text("musicVersion", version);
       if (exe) setDirect("musicExe", exe, "Download EXE " + version + " →");
-      if (msi) setDirect("musicMsi", msi, "Download MSI " + version + " →");
       $("musicDot")?.classList.add("live");
       text("musicStatus", "✓ Direct downloads ready · " + version);
     } catch (error) {
       $("musicDot")?.classList.remove("live");
       text("musicVersion", FALLBACK.music);
       if (FALLBACK.exe) setDirect("musicExe", FALLBACK.exe, "Download EXE →");
-      if (FALLBACK.msi) setDirect("musicMsi", FALLBACK.msi, "Download MSI →");
       text("musicStatus", "✓ Direct downloads ready · " + FALLBACK.music);
     }
   }
@@ -1311,7 +1316,6 @@ footer {
   }
 
   setDirect("musicExe", FALLBACK.exe, "Download EXE →");
-  setDirect("musicMsi", FALLBACK.msi, "Download MSI →");
   setDirect("apkButton", FALLBACK.apk, "Download APK " + FALLBACK.mobile + " →");
   text("musicVersion", FALLBACK.music);
   text("mobileVersion", FALLBACK.mobile);

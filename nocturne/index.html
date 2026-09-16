@@ -639,12 +639,52 @@ p.sectionSub {
 }
 
 /* ==================== CHANGELOG HIGHLIGHTS ==================== */
+.changelogColumns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+  max-width: 1140px;
+  margin: 0 auto;
+}
+@media (max-width: 860px) {
+  .changelogColumns {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+.changelogCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.changelogColHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.changelogColBadge {
+  font: 700 11px "DM Mono", monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+}
+.changelogColHeader h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
 .changelogList {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-width: 860px;
-  margin: 0 auto;
 }
 .changelogItem {
   background: var(--card);
@@ -1134,70 +1174,143 @@ footer.nocturneFooter {
         <p class="sectionSub">Highlights from recent Nocturne updates.</p>
       </div>
 
-      <div class="changelogList">
-        <div class="changelogItem">
-          <div class="changelogMeta">
-            <span class="changelogVersion">Nocturne Desktop v0.7-d</span>
-            <span class="changelogDate">2 Sept 2026</span>
+      <div class="changelogColumns">
+        <!-- DESKTOP COLUMN -->
+        <div class="changelogCol">
+          <div class="changelogColHeader">
+            <span class="changelogColBadge">🖥️ Desktop</span>
+            <h3>Nocturne Desktop</h3>
           </div>
-          <div class="changelogTitle">Hardware acceleration, PIN auth & fullscreen polish</div>
-          <div class="changelogDetails">
-            Added hardware acceleration support, re-added PIN authentication for remote control features, simplified Last.fm integration, true borderless fullscreen player, and UI polish across the app.
+          <div class="changelogList">
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Desktop v0.8.3</span>
+                <span class="changelogDate">16 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Profile Spotify linking, playlist sync & BetterLyrics viewing tech</div>
+              <div class="changelogDetails">
+                Moved Spotify authentication directly into user profile dropdown with a Spotify Premium notice banner. Added 3-way playlist handling modes (Separate, In Sync, Transfer) with dual sidebar tabs for YTM and Spotify playlists and 1-click track transfers. Replaced oversized info sidebar spacing with BetterLyrics viewing tech (dual-edge gradient alpha masking, smooth centering auto-scroll, and syllable glow). Added toggleable audio quality badge and decoupled Listen Together handoffs.
+              </div>
+            </div>
+
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Desktop v0.8.2</span>
+                <span class="changelogDate">13 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Motion album art, 8 lyric styles & resizable sidebar</div>
+              <div class="changelogDetails">
+                Looping video art integration from Nocturne Canvas and Apple Music catalog. 8 distinct selectable lyric animation styles. Fullscreen now playing edge-to-edge acrylic translucency. Resizable left navigation sidebar with interactive drag handle (200px–420px).
+              </div>
+            </div>
+
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Desktop v0.8.1</span>
+                <span class="changelogDate">11 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Audio engine optimization & memory enhancements</div>
+              <div class="changelogDetails">
+                Optimized mpv IPC audio stream processing, reduced webview memory consumption during heavy playlist browsing, and stability improvements across all OS platforms.
+              </div>
+            </div>
+
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Desktop v0.8.0</span>
+                <span class="changelogDate">10 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Liquid Glass theme, floating player bar & audio crossfade</div>
+              <div class="changelogDetails">
+                Acrylic translucent floating panels with backdrop blur, floating player bar with rounded corners, smooth right sidebar docking with dynamic width transitions, native mpv audio crossfade (0–12s), and Discord Rich Presence customization suite.
+              </div>
+            </div>
+
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Desktop v0.7-d</span>
+                <span class="changelogDate">2 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Hardware acceleration, PIN auth & fullscreen polish</div>
+              <div class="changelogDetails">
+                Added hardware acceleration support, re-added PIN authentication for remote control features, simplified Last.fm integration, true borderless fullscreen player, and UI polish across the app.
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="changelogItem">
-          <div class="changelogMeta">
-            <span class="changelogVersion">Nocturne Desktop v0.6.7</span>
-            <span class="changelogDate">29 Aug 2026</span>
+        <!-- MOBILE COLUMN -->
+        <div class="changelogCol">
+          <div class="changelogColHeader">
+            <span class="changelogColBadge">📱 Mobile</span>
+            <h3>Nocturne Mobile</h3>
           </div>
-          <div class="changelogTitle">Seamless remote device sync & pairing</div>
-          <div class="changelogDetails">
-            Zero-PIN remote pairing with UDP discovery and direct WebSockets over local Wi-Fi or Tailscale. Output Devices sidebar for one-click switching and bidirectional playback handoff between PC and phone.
-          </div>
-        </div>
+          <div class="changelogList">
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Mobile v0.3</span>
+                <span class="changelogDate">16 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Decoupled Listen Together, direct Spotify linking & typography restoration</div>
+              <div class="changelogDetails">
+                Direct Spotify account linking with cookie authentication (psst-style). Decoupled Listen Together room sessions from audio output routing, allowing seamless device switching in-room. Restored high-contrast typography across all 10 themes, fixed corrupted &lt;?&gt; play count glyphs, merged profile & settings popover, and modern skeleton loaders.
+              </div>
+            </div>
 
-        <div class="changelogItem">
-          <div class="changelogMeta">
-            <span class="changelogVersion">Nocturne Desktop v0.6.6</span>
-            <span class="changelogDate">29 Aug 2026</span>
-          </div>
-          <div class="changelogTitle">Remote server, Discord presence & library sync</div>
-          <div class="changelogDetails">
-            Embedded remote server with QR pairing, official Discord Rich Presence with progress and album artwork, context menus for saving/removing songs from YouTube Music library, and frosted-glass context menus.
-          </div>
-        </div>
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Mobile v0.2.4-m</span>
+                <span class="changelogDate">11 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Syllable lyric alignment, queue reordering animations & performance</div>
+              <div class="changelogDetails">
+                Syllable-level synchronized lyric highlighting, smooth drag-and-drop queue reordering animations, and enhanced battery efficiency.
+              </div>
+            </div>
 
-        <div class="changelogItem">
-          <div class="changelogMeta">
-            <span class="changelogVersion">Nocturne Desktop v0.6.5</span>
-            <span class="changelogDate">28 Aug 2026</span>
-          </div>
-          <div class="changelogTitle">Glassy theme and real-time GPU background</div>
-          <div class="changelogDetails">
-            Added the Glassy ambient theme with translucent frosted-glass panels, real-time GPU fluid background, performance tab with low-spec controls, and persistent floating tab bars.
-          </div>
-        </div>
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Mobile v0.2.3-m</span>
+                <span class="changelogDate">8 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Remote control handoff polish, background sync & media controls</div>
+              <div class="changelogDetails">
+                Sub-second remote playback synchronization with Nocturne Desktop, rich Android media notification controls, and auto-reconnect logic.
+              </div>
+            </div>
 
-        <div class="changelogItem">
-          <div class="changelogMeta">
-            <span class="changelogVersion">Nocturne Mobile v0.2-m</span>
-            <span class="changelogDate">2 Sept 2026</span>
-          </div>
-          <div class="changelogTitle">Bug fixes, improved navigation & sync foundation</div>
-          <div class="changelogDetails">
-            Added the base for improved desktop sync, cleaner navigation hierarchy, performance improvements, and codebase cleanups.
-          </div>
-        </div>
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Mobile v0.2.2-m</span>
+                <span class="changelogDate">5 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Material 3 Expressive theme enhancements & Axion EQ</div>
+              <div class="changelogDetails">
+                Material 3 Expressive dynamic color theming, Axion EQ equalizer presets, and enhanced library navigation hierarchy.
+              </div>
+            </div>
 
-        <div class="changelogItem">
-          <div class="changelogMeta">
-            <span class="changelogVersion">Nocturne Mobile v0.1</span>
-            <span class="changelogDate">29 Aug 2026</span>
-          </div>
-          <div class="changelogTitle">The first Nocturne Music release for Android</div>
-          <div class="changelogDetails">
-            Full remote-controller mode for desktop playback, standalone Android player with dynamic ambient backgrounds (Apple Music Fluid Blur, Live Mesh), and bidirectional handoff.
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Mobile v0.2-m</span>
+                <span class="changelogDate">2 Sept 2026</span>
+              </div>
+              <div class="changelogTitle">Bug fixes, improved navigation & sync foundation</div>
+              <div class="changelogDetails">
+                Added the base for improved desktop sync, cleaner navigation hierarchy, performance improvements, and codebase cleanups.
+              </div>
+            </div>
+
+            <div class="changelogItem">
+              <div class="changelogMeta">
+                <span class="changelogVersion">Nocturne Mobile v0.1</span>
+                <span class="changelogDate">29 Aug 2026</span>
+              </div>
+              <div class="changelogTitle">The first Nocturne Music release for Android</div>
+              <div class="changelogDetails">
+                Full remote-controller mode for desktop playback, standalone Android player with dynamic ambient backgrounds (Apple Music Fluid Blur, Live Mesh), and bidirectional handoff.
+              </div>
+            </div>
           </div>
         </div>
       </div>
