@@ -1,3 +1,7 @@
 theme: jekyll-theme-minimal
 title: Neo's Portfolio
 description: Contains all of my projects and a lil bit about me.
+
+include:
+  - _app
+  - .nojekyll
