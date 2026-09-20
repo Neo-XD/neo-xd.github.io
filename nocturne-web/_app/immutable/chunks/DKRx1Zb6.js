@@ -1,0 +1,1 @@
+import{$ as e,_t as t,yt as n}from"./C7Nau2LK.js";var r=200,i=120;function a(){let a=n(i);return{count(t){return t<=r?t:Math.min(e(a),t)},more(t){return t>r&&e(a)<t},reset(){t(a,i)},sentinel(n){let r=new IntersectionObserver(([n])=>n.isIntersecting&&t(a,e(a)+i),{rootMargin:`600px 0px`});return r.observe(n),()=>r.disconnect()}}}export{a as t};
